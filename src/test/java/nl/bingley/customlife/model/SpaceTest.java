@@ -2,6 +2,8 @@ package nl.bingley.customlife.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SpaceTest {
@@ -17,11 +19,12 @@ public class SpaceTest {
         space.update();
 
         assertEquals(Space.lowEnergyState, cell.value);
-        space.getAllCells().stream()
+        List<Cell> cells = space.getAllCells();
+        cells.stream()
                 .filter(neighbour -> neighbour.x != cell.x || neighbour.y != cell.y)
                 .forEach(neighbour ->
-                        assertEquals((Space.highEnergyState - Space.lowEnergyState) * 0.125f, neighbour.value));
-        assertEquals(Space.highEnergyState, space.getAllCells().stream().map(fin -> fin.value).reduce(Float::sum).get());
+                        assertEquals(Space.energyJump * (1f / (cells.size() - 1)), neighbour.value));
+        assertEquals(Space.highEnergyState, cells.stream().map(fin -> fin.value).reduce(Float::sum).get());
     }
 
     @Test

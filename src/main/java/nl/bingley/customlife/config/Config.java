@@ -15,7 +15,7 @@ public class Config {
     @Bean
     public Timer scheduleTimers(RenderTimerTask renderTimerTask, TickTimerTask tickTimerTask) {
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate(renderTimerTask, 0, 16);
+        timer.scheduleAtFixedRate(renderTimerTask, 0, 32);
         timer.scheduleAtFixedRate(tickTimerTask, 0, 8);
         return timer;
     }

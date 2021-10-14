@@ -8,8 +8,9 @@ import java.util.List;
 @Component
 public class Universe {
 
-    private static final int size = 128;
-    private static final int spawnSize = 32;
+    public static final int size = 128;
+
+    private static final int spawnSize = 64;
 
     private boolean paused = false;
 

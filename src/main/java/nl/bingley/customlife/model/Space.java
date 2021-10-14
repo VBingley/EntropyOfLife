@@ -14,21 +14,22 @@ import java.util.stream.Collectors;
  */
 public class Space {
 
-    public static final float aliveThreshold = 1 / 2f;
-    public static final float highEnergyState = 7 / 8f;
+    public static final float lifeThreshold = 1 / 2f;
+    public static final float highEnergyState = 6 / 8f;
     public static final float lowEnergyState = 1 / 8f;
     public static final float minEnergyState = 0f;
 
-    public static final int birthRadius = 1;
-    public static final int energyRadius = 2;
-    public static final int birthCondition = 3;
-    public static final int survivalLimit = 2;
+    public static final int birthRadius = 5;
+    public static final int energyRadius = 0;
+
+    public static final int birthMax = 45;
+    public static final int birthMin = 34;
+    public static final int liveMax = 57;
+    public static final int liveMin = 33;
 
     public static final float energyJump = highEnergyState - lowEnergyState;
 
     public Cell[][] cells;
-
-    private final Random random = new Random();
 
     public Space(int size) {
         cells = new Cell[size][size];
@@ -53,24 +54,24 @@ public class Space {
                 });
         // Update
         Arrays.stream(cells).flatMap(Arrays::stream)
-                //.parallel()
+                .parallel()
                 .forEach(this::updateCell);
     }
 
     private void updateCell(Cell cell) {
-        List<Cell> birthNeighbours = getAllNeighbouringCells(cell, birthRadius);
+        int livingNeighbours = countLivingNeighbours(cell);
+
         List<Cell> energyNeighbours = getAllNeighbouringCells(cell, energyRadius);
-        int aliveNeighbours = countAliveNeighbours(birthNeighbours);
-        if (isAlive(cell) && (aliveNeighbours > birthCondition || aliveNeighbours < survivalLimit)) {
+        if (isAlive(cell) && (livingNeighbours < liveMin || livingNeighbours > liveMax)) {
             // Cell dies, lower energy state
             gainEnergy(cell, -energyJump, energyNeighbours);
         } else if (isAlive(cell) && cell.oldValue != highEnergyState) {
             // Cell stays alive, restore to high energy state
-            gainEnergy(cell, random.nextFloat() * (highEnergyState - cell.oldValue), energyNeighbours);
+            gainEnergy(cell, highEnergyState - cell.oldValue, energyNeighbours);
         } else if (isAlive(cell)) {
             // Cell stays alive, maintain high energy state
             cell.value += cell.oldValue;
-        } else if (aliveNeighbours == birthCondition) {
+        } else if (livingNeighbours >= birthMin && livingNeighbours <= birthMax) {
             // Cell is born, raise energy state
             gainEnergy(cell, energyJump, energyNeighbours);
         } else if (cell.oldValue > lowEnergyState) {
@@ -78,7 +79,7 @@ public class Space {
             gainEnergy(cell, lowEnergyState - cell.oldValue, energyNeighbours);
         } else if (cell.oldValue < minEnergyState) {
             // Cell stays dead, maintain low energy state
-            gainEnergy(cell, random.nextFloat() * minEnergyState - cell.oldValue, energyNeighbours);
+            gainEnergy(cell, minEnergyState - cell.oldValue, energyNeighbours);
         } else {
             // Cell stays dead, maintain low energy state
             cell.value += cell.oldValue;
@@ -97,19 +98,17 @@ public class Space {
         return neighbours;
     }
 
-    private int countAliveNeighbours(List<Cell> neighbours) {
-        return (int) neighbours.stream()
-                .filter(this::isAlive)
-                .count();
+    private int countLivingNeighbours(Cell centerCell) {
+        return (int)getAllNeighbouringCells(centerCell, birthRadius).stream().filter(this::isAlive).count();
     }
 
     private boolean isAlive(Cell cell) {
-        return cell.oldValue > aliveThreshold;
+        return cell.oldValue > lifeThreshold;
     }
 
     private void gainEnergy(Cell cell, float energy, List<Cell> neighbours) {
         cell.value += cell.oldValue + energy;
-        neighbours.forEach(neighbour -> neighbour.value -= energy * 1 / neighbours.size());
+        neighbours.forEach(neighbour -> neighbour.value -= energy * (1f / neighbours.size()));
     }
 
     private Cell getCell(int x, int y) {
@@ -127,7 +126,7 @@ public class Space {
             for (int y = 0; y < size; y++) {
                 int margin = (int) (size * 0.5 - spawnSize * 0.5);
                 if (x >= margin && x <= size - margin && y >= margin && y <= size - margin) {
-                    cells[x][y] = new Cell(x, y, lowEnergyState + random.nextFloat() * (highEnergyState - lowEnergyState));
+                    cells[x][y] = new Cell(x, y, random.nextFloat());
                 } else {
                     cells[x][y] = new Cell(x, y, random.nextFloat() * lowEnergyState);
                 }

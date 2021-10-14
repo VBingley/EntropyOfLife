@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 public class UniversePanel extends JPanel {
     private static final long serialVersionUID = 119486406615542676L;
 
-    private int width = 0;
-    private int height = 0;
     private int translateX = 0;
     private int translateY = 0;
     private int cellSize = 5;
@@ -36,7 +34,7 @@ public class UniversePanel extends JPanel {
         paintBackground(graphics);
 
         Space space = universe.getSpace();
-        List<Cell> allCells = space.getAllCells();
+        List<Cell> allCells = new ArrayList<>(space.getAllCells());
 
         paintCells(graphics, allCells);
         paintInfo(graphics, allCells);
@@ -48,12 +46,16 @@ public class UniversePanel extends JPanel {
     private void paintBackground(Graphics graphics) {
         graphics.setColor(Color.BLACK);
         Rectangle bounds = graphics.getClipBounds();
-        graphics.fillRect(0, 0, bounds.width, bounds.height);
+        graphics.fillRect(0, 0, bounds.width, translateY);
+        graphics.fillRect(0, 0, translateX, bounds.height);
+        int universeSize = cellSize * Universe.size;
+        graphics.fillRect(0, translateY + universeSize, bounds.width, bounds.height - translateY);
+        graphics.fillRect(translateX + universeSize, 0, bounds.width - translateX, bounds.height);
     }
 
     private void paintInfo(Graphics graphics, List<Cell> allCells) {
         List<Cell> aliveCells = allCells.stream()
-                .filter(cell -> cell.value > Space.aliveThreshold)
+                .filter(cell -> cell.value > Space.lifeThreshold)
                 .collect(Collectors.toList());
         graphics.setColor(Color.RED);
         graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
@@ -65,36 +67,32 @@ public class UniversePanel extends JPanel {
 
     private void paintCells(Graphics graphics, Collection<Cell> cells) {
         Rectangle bounds = graphics.getClipBounds();
-        width = bounds.width;
-        height = bounds.height;
 
-        cells = cells.stream().sorted((cell1, cell2) -> (Float.compare(cell1.value, cell2.value))).collect(Collectors.toList());
-        float cellValue = -99;
         int drawSize = cellSize > 3 ? cellSize - 1 : cellSize;
-        for (Cell cell : cells) {
+        cells.forEach(cell -> {
             int posX = cell.x * cellSize + translateX;
             int posY = cell.y * cellSize + translateY;
-            if (posX > -cellSize && posX < width && posY > -cellSize && posY < height) {
-                if (cell.value > cellValue + 0.01) {
-                    graphics.setColor(getCellColor(cell.value));
-                }
-                paintCell(graphics, posX, posY, drawSize);
+            if (posX > -cellSize && posX < bounds.width && posY > -cellSize && posY < bounds.height) {
+                paintCell(graphics, posX, posY, drawSize, calculateCellColor(cell.value));
             }
-        }
+        });
     }
 
-    private Color getCellColor(float cellValue) {
+    private Color calculateCellColor(float cellValue) {
+        if (cellValue > 1) {
+            return new Color(0.75f, 0, 0);
+        }
         if (cellValue > Space.minEnergyState) {
-            float red = cellValue > Space.aliveThreshold ?
-                    gradient(cellValue, Space.highEnergyState - Space.lowEnergyState, 1) : 0;
-            float green = cellValue > Space.aliveThreshold ?
+            float red = cellValue > Space.lifeThreshold ?
+                    0.5f * gradient(cellValue, 1 - Space.lifeThreshold, 1) : 0;
+            float green = cellValue > Space.lifeThreshold ?
                     0.5f * gradient(cellValue, Space.highEnergyState - Space.lowEnergyState, Space.highEnergyState) : 0;
-            float blue = 0.5f * gradient(cellValue, Space.aliveThreshold - Space.minEnergyState, Space.aliveThreshold);
+            float blue = 0.5f * gradient(cellValue, Space.lifeThreshold - Space.minEnergyState, Space.lifeThreshold);
             return new Color(red, green, blue);
         } else {
             float abs = Math.abs(cellValue);
-            float red = abs > 1 ? 1 : abs;
-            return new Color(red * 0.5f, 0, 0);
+            float value = abs > 1 ? 1 : abs;
+            return new Color(value * 0.5f, 0, value * 0.5f);
         }
     }
 
@@ -108,7 +106,10 @@ public class UniversePanel extends JPanel {
         return result < 0 ? 0 : result;
     }
 
-    private void paintCell(Graphics graphics, int posX, int posY, int size) {
+    private void paintCell(Graphics graphics, int posX, int posY, int size, Color fill) {
+        graphics.setColor(Color.BLACK);
+        graphics.fillRect(posX, posY, cellSize, cellSize);
+        graphics.setColor(fill);
         graphics.fillRect(posX, posY, size, size);
     }
 
