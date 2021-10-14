@@ -68,7 +68,7 @@ public class UniversePanel extends JPanel {
         width = bounds.width;
         height = bounds.height;
 
-        cells = cells.stream().sorted((cell1, cell2) -> (int) (cell1.value - cell2.value)).collect(Collectors.toList());
+        cells = cells.stream().sorted((cell1, cell2) -> (Float.compare(cell1.value, cell2.value))).collect(Collectors.toList());
         float cellValue = -99;
         int drawSize = cellSize > 3 ? cellSize - 1 : cellSize;
         for (Cell cell : cells) {
