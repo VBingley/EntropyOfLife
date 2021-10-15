@@ -1,28 +1,29 @@
-package nl.bingley.customlife.timertasks;
+package nl.bingley.customlife.timer;
 
-import nl.bingley.customlife.model.Universe;
+import nl.bingley.customlife.Universe;
 import org.springframework.stereotype.Component;
 
-import java.util.TimerTask;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 @Component
-public class TickTimerTask extends TimerTask {
+public class UniverseUpdater implements ActionListener {
 
     private final Universe universe;
     private long lastTick;
     private long genPerSecTimer;
     private int genPersecCounter = 0;
 
-    public TickTimerTask(Universe universe) {
+    public UniverseUpdater(Universe universe) {
         this.universe = universe;
         lastTick = System.currentTimeMillis();
         genPerSecTimer = System.currentTimeMillis();
     }
 
     @Override
-    public void run() {
-        if (!universe.isPaused() && lastTick < System.currentTimeMillis() - Math.floor(1000d/universe.getGenPerSec())) {
-            updateFpsTimer();
+    public void actionPerformed(ActionEvent event) {
+        if (!universe.isPaused()) {
+            updateGenPerSecTimer();
             universe.nextGeneration();
             lastTick = System.currentTimeMillis();
         } else if (universe.isPaused()) {
@@ -30,10 +31,10 @@ public class TickTimerTask extends TimerTask {
         }
     }
 
-    private void updateFpsTimer() {
+    private void updateGenPerSecTimer() {
         if (System.currentTimeMillis() > genPerSecTimer + 1000 ) {
             genPerSecTimer = System.currentTimeMillis();
-            universe.setGenPerSecCounter(genPersecCounter);
+            universe.setGenPerSec(genPersecCounter);
             genPersecCounter = 0;
         }
             genPersecCounter++;

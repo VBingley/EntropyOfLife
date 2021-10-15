@@ -1,7 +1,8 @@
-package nl.bingley.customlife.model;
+package nl.bingley.customlife;
 
 import nl.bingley.customlife.config.LifeProperties;
 import nl.bingley.customlife.config.UniverseProperties;
+import nl.bingley.customlife.model.Cell;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

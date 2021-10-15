@@ -3,7 +3,6 @@ package nl.bingley.customlife;
 import nl.bingley.customlife.config.LifeProperties;
 import nl.bingley.customlife.config.UniverseProperties;
 import nl.bingley.customlife.model.Cell;
-import nl.bingley.customlife.model.Universe;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -22,7 +21,6 @@ public class UniversePanel extends JPanel {
     private int translateX = 0;
     private int translateY = 0;
     private int cellSize = 5;
-    private boolean painting = false;
 
     private final Universe universe;
 
@@ -35,7 +33,7 @@ public class UniversePanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics graphics) {
-        painting = true;
+
         paintBackground(graphics);
 
         Cell[][] allCells = universe.getAllCells();
@@ -44,7 +42,6 @@ public class UniversePanel extends JPanel {
         paintInfo(graphics, allCells);
 
         graphics.dispose();
-        painting = false;
     }
 
     private void paintBackground(Graphics graphics) {
@@ -66,7 +63,7 @@ public class UniversePanel extends JPanel {
                 .count();
         graphics.setColor(Color.RED);
         graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
-        graphics.drawString("GpS:  " + universe.getGenPerSecCounter() + "/" + universe.getGenPerSec(), 10, 40);
+        graphics.drawString("Gen/s:  " + universe.getGenPerSec(), 10, 40);
         graphics.drawString("Net E: " + Math.round(cells.stream().map(cell -> cell.value).reduce(Float::sum).orElse(-1f)), 10, 60);
         graphics.drawString("Abs E: " + Math.round(cells.stream().map(cell -> Math.abs(cell.value)).reduce(Float::sum).orElse(-1f)), 10, 80);
         graphics.drawString("Alive: " + aliveCount, 10, 100);
@@ -140,10 +137,6 @@ public class UniversePanel extends JPanel {
             translateY = translateY - rawTranslateY / 2;
             cellSize = cellSize / 2;
         }
-    }
-
-    public boolean isPainting() {
-        return painting;
     }
 
     public void addTranslateX(int translateX) {

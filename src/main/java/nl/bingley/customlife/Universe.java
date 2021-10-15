@@ -1,8 +1,8 @@
-package nl.bingley.customlife.model;
+package nl.bingley.customlife;
 
-import nl.bingley.customlife.CellStateUtil;
 import nl.bingley.customlife.config.LifeProperties;
 import nl.bingley.customlife.config.UniverseProperties;
+import nl.bingley.customlife.model.Cell;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -18,8 +18,7 @@ public class Universe {
     private final CellStateUtil cellStateUtil;
     private boolean paused = false;
 
-    private int genPerSec = 2;
-    private int genPerSecCounter = 0;
+    private int genPerSec = 0;
     private int generation;
 
     public Cell[][] cells;
@@ -113,16 +112,6 @@ public class Universe {
         update();
     }
 
-    public void incrementGenPerSec() {
-        genPerSec++;
-    }
-
-    public void decrementGenPerSec() {
-        if (genPerSec > 0) {
-            genPerSec--;
-        }
-    }
-
     public Cell[][] getAllCells() {
         return cells.clone();
     }
@@ -131,12 +120,8 @@ public class Universe {
         return genPerSec;
     }
 
-    public int getGenPerSecCounter() {
-        return genPerSecCounter;
-    }
-
-    public void setGenPerSecCounter(int count) {
-        genPerSecCounter = count;
+    public void setGenPerSec(int count) {
+        genPerSec = count;
     }
 
     public int getGeneration() {

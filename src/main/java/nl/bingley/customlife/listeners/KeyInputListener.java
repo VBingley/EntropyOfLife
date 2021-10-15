@@ -1,8 +1,9 @@
 package nl.bingley.customlife.listeners;
 
-import nl.bingley.customlife.model.Universe;
+import nl.bingley.customlife.Universe;
 import org.springframework.stereotype.Component;
 
+import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -10,9 +11,11 @@ import java.awt.event.KeyListener;
 public class KeyInputListener implements KeyListener {
 
     private final Universe universe;
+    private final Timer universeUpdateTimer;
 
-    public KeyInputListener(Universe universe) {
+    public KeyInputListener(Universe universe, Timer universeUpdateTimer) {
         this.universe = universe;
+        this.universeUpdateTimer = universeUpdateTimer;
     }
 
     @Override
@@ -27,10 +30,10 @@ public class KeyInputListener implements KeyListener {
                 universe.reset();
                 break;
             case KeyEvent.VK_UP:
-                universe.incrementGenPerSec();
+                universeUpdateTimer.setDelay((int) Math.floor(universeUpdateTimer.getDelay() * 0.5));
                 break;
             case KeyEvent.VK_DOWN:
-                universe.decrementGenPerSec();
+                universeUpdateTimer.setDelay((int) Math.floor(universeUpdateTimer.getDelay() * 2));
                 break;
             case KeyEvent.VK_RIGHT:
                 if (universe.isPaused()) {
