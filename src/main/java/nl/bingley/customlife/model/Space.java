@@ -1,48 +1,38 @@
 package nl.bingley.customlife.model;
 
+import nl.bingley.customlife.CellStateUtil;
+import nl.bingley.customlife.config.LifeProperties;
+import nl.bingley.customlife.config.UniverseProperties;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-/**
- * Any live cell with two or three live neighbours maintain high energy state
- * Any live cell over 1.0 drop to 1, distributing the excess among neighbours
- * All other live cells die, distributing 1/8 to each neighbour
- * Any dead cell with three live neighbours makes an energy jump up, taking energy from neighbours
- */
 public class Space {
 
-    public static final float lifeThreshold = 1 / 2f;
-    public static final float highEnergyState = 6 / 8f;
-    public static final float lowEnergyState = 1 / 8f;
-    public static final float minEnergyState = 0f;
+    private final LifeProperties props;
 
-    public static final int birthRadius = 5;
-    public static final int energyRadius = 0;
-
-    public static final int birthMax = 45;
-    public static final int birthMin = 34;
-    public static final int liveMax = 57;
-    public static final int liveMin = 33;
-
-    public static final float energyJump = highEnergyState - lowEnergyState;
+    private final CellStateUtil cellStateUtil;
 
     public Cell[][] cells;
 
-    public Space(int size) {
+    public Space(UniverseProperties universeProperties, boolean fillRandom) {
+        props = universeProperties.getLifeProperties();
+        cellStateUtil = new CellStateUtil(props);
+
+        int size = universeProperties.getSize();
         cells = new Cell[size][size];
-        initializeEmpty(size);
+        if (fillRandom) {
+            initializeRandom(size, universeProperties.getSpawnSize());
+        } else {
+            initializeEmpty(size);
+        }
     }
 
-    public Space(int size, int spawnSize) {
-        cells = new Cell[size][size];
-        initializeRandom(size, spawnSize);
-    }
-
-    public List<Cell> getAllCells() {
-        return Arrays.stream(cells).flatMap(Arrays::stream).collect(Collectors.toList());
+    public Cell[][] getAllCells() {
+        return cells.clone();
     }
 
     public void update() {
@@ -54,69 +44,37 @@ public class Space {
                 });
         // Update
         Arrays.stream(cells).flatMap(Arrays::stream)
-                .parallel()
+                //.parallel()
                 .forEach(this::updateCell);
     }
 
     private void updateCell(Cell cell) {
-        int livingNeighbours = countLivingNeighbours(cell);
-
-        List<Cell> energyNeighbours = getAllNeighbouringCells(cell, energyRadius);
-        if (isAlive(cell) && (livingNeighbours < liveMin || livingNeighbours > liveMax)) {
-            // Cell dies, lower energy state
-            gainEnergy(cell, -energyJump, energyNeighbours);
-        } else if (isAlive(cell) && cell.oldValue != highEnergyState) {
-            // Cell stays alive, restore to high energy state
-            gainEnergy(cell, highEnergyState - cell.oldValue, energyNeighbours);
-        } else if (isAlive(cell)) {
-            // Cell stays alive, maintain high energy state
-            cell.value += cell.oldValue;
-        } else if (livingNeighbours >= birthMin && livingNeighbours <= birthMax) {
-            // Cell is born, raise energy state
-            gainEnergy(cell, energyJump, energyNeighbours);
-        } else if (cell.oldValue > lowEnergyState) {
-            // Cell stays dead, drain to low energy state
-            gainEnergy(cell, lowEnergyState - cell.oldValue, energyNeighbours);
-        } else if (cell.oldValue < minEnergyState) {
-            // Cell stays dead, maintain low energy state
-            gainEnergy(cell, minEnergyState - cell.oldValue, energyNeighbours);
+        int livingNeighbours = cellStateUtil.countLivingCells(findAllNeighbours(cell, props.getLifeNeighbourhoodRadius()));
+        float energyDelta = cellStateUtil.calculateEnergyDelta(cell, livingNeighbours);
+        if (energyDelta != 0) {
+            cellStateUtil.gainEnergy(energyDelta, cell, findAllNeighbours(cell, props.getEnergyNeighbourhoodRadius()));
         } else {
-            // Cell stays dead, maintain low energy state
             cell.value += cell.oldValue;
         }
     }
 
-    private List<Cell> getAllNeighbouringCells(Cell centerCell, int radius) {
+    private List<Cell> findAllNeighbours(Cell centerCell, int radius) {
         List<Cell> neighbours = new ArrayList<>();
         for (int x = centerCell.x - radius; x <= centerCell.x + radius; x++) {
             for (int y = centerCell.y - radius; y <= centerCell.y + radius; y++) {
                 if (x != centerCell.x || y != centerCell.y) {
-                    neighbours.add(getCell(x, y));
+                    neighbours.add(findCell(x, y));
                 }
             }
         }
         return neighbours;
     }
 
-    private int countLivingNeighbours(Cell centerCell) {
-        return (int)getAllNeighbouringCells(centerCell, birthRadius).stream().filter(this::isAlive).count();
-    }
-
-    private boolean isAlive(Cell cell) {
-        return cell.oldValue > lifeThreshold;
-    }
-
-    private void gainEnergy(Cell cell, float energy, List<Cell> neighbours) {
-        cell.value += cell.oldValue + energy;
-        neighbours.forEach(neighbour -> neighbour.value -= energy * (1f / neighbours.size()));
-    }
-
-    private Cell getCell(int x, int y) {
+    protected Cell findCell(int x, int y) {
         if (x < 0) x = cells.length + x;
         if (x >= cells.length) x = x - cells.length;
         if (y < 0) y = cells.length + y;
         if (y >= cells.length) y = y - cells.length;
-
         return cells[x][y];
     }
 
@@ -128,7 +86,7 @@ public class Space {
                 if (x >= margin && x <= size - margin && y >= margin && y <= size - margin) {
                     cells[x][y] = new Cell(x, y, random.nextFloat());
                 } else {
-                    cells[x][y] = new Cell(x, y, random.nextFloat() * lowEnergyState);
+                    cells[x][y] = new Cell(x, y, random.nextFloat() * props.getLowEnergyState());
                 }
             }
         }
@@ -137,7 +95,7 @@ public class Space {
     private void initializeEmpty(int size) {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                cells[x][y] = new Cell(x, y, minEnergyState);
+                cells[x][y] = new Cell(x, y, props.getMinEnergyState());
             }
         }
     }

@@ -1,5 +1,7 @@
 package nl.bingley.customlife;
 
+import nl.bingley.customlife.config.LifeProperties;
+import nl.bingley.customlife.config.UniverseProperties;
 import nl.bingley.customlife.model.Cell;
 import nl.bingley.customlife.model.Space;
 import nl.bingley.customlife.model.Universe;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +19,9 @@ import java.util.stream.Collectors;
 public class UniversePanel extends JPanel {
     private static final long serialVersionUID = 119486406615542676L;
 
+    private final int universeSize;
+    private final LifeProperties lifeProps;
+
     private int translateX = 0;
     private int translateY = 0;
     private int cellSize = 5;
@@ -23,9 +29,11 @@ public class UniversePanel extends JPanel {
 
     private final Universe universe;
 
-    public UniversePanel(Universe initialState) {
+    public UniversePanel(Universe universe, UniverseProperties universeProperties) {
         super();
-        universe = initialState;
+        this.universe = universe;
+        universeSize = universeProperties.getSize();
+        lifeProps = universeProperties.getLifeProperties();
     }
 
     @Override
@@ -34,7 +42,7 @@ public class UniversePanel extends JPanel {
         paintBackground(graphics);
 
         Space space = universe.getSpace();
-        List<Cell> allCells = new ArrayList<>(space.getAllCells());
+        Cell[][] allCells = space.getAllCells();
 
         paintCells(graphics, allCells);
         paintInfo(graphics, allCells);
@@ -48,46 +56,51 @@ public class UniversePanel extends JPanel {
         Rectangle bounds = graphics.getClipBounds();
         graphics.fillRect(0, 0, bounds.width, translateY);
         graphics.fillRect(0, 0, translateX, bounds.height);
-        int universeSize = cellSize * Universe.size;
-        graphics.fillRect(0, translateY + universeSize, bounds.width, bounds.height - translateY);
-        graphics.fillRect(translateX + universeSize, 0, bounds.width - translateX, bounds.height);
+        int universeScaled = cellSize * universeSize;
+        graphics.fillRect(0, translateY + universeScaled, bounds.width, bounds.height - translateY);
+        graphics.fillRect(translateX + universeScaled, 0, bounds.width - translateX, bounds.height);
     }
 
-    private void paintInfo(Graphics graphics, List<Cell> allCells) {
-        List<Cell> aliveCells = allCells.stream()
-                .filter(cell -> cell.value > Space.lifeThreshold)
+    private void paintInfo(Graphics graphics, Cell[][] allCells) {
+        List<Cell> cells = Arrays.stream(allCells)
+                .flatMap(Arrays::stream)
                 .collect(Collectors.toList());
+        long aliveCount = cells.stream()
+                .filter(cell -> cell.value > lifeProps.getLifeEnergyThreshold())
+                .count();
         graphics.setColor(Color.RED);
         graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
         graphics.drawString("GpS:  " + universe.getGenPerSecCounter() + "/" + universe.getGenPerSec(), 10, 40);
-        graphics.drawString("Net E: " + Math.round(allCells.stream().map(cell -> cell.value).reduce(Float::sum).orElse(-1f) * 100) * 0.01d, 10, 60);
-        graphics.drawString("Abs E: " + Math.round(allCells.stream().map(cell -> Math.abs(cell.value)).reduce(Float::sum).orElse(-1f) * 100) * 0.01d, 10, 80);
-        graphics.drawString("Alive: " + aliveCells.size(), 10, 100);
+        graphics.drawString("Net E: " + Math.round(cells.stream().map(cell -> cell.value).reduce(Float::sum).orElse(-1f)), 10, 60);
+        graphics.drawString("Abs E: " + Math.round(cells.stream().map(cell -> Math.abs(cell.value)).reduce(Float::sum).orElse(-1f)), 10, 80);
+        graphics.drawString("Alive: " + aliveCount, 10, 100);
     }
 
-    private void paintCells(Graphics graphics, Collection<Cell> cells) {
+    private void paintCells(Graphics graphics, Cell[][] cells) {
         Rectangle bounds = graphics.getClipBounds();
 
         int drawSize = cellSize > 3 ? cellSize - 1 : cellSize;
-        cells.forEach(cell -> {
-            int posX = cell.x * cellSize + translateX;
-            int posY = cell.y * cellSize + translateY;
-            if (posX > -cellSize && posX < bounds.width && posY > -cellSize && posY < bounds.height) {
-                paintCell(graphics, posX, posY, drawSize, calculateCellColor(cell.value));
+        for (int x = 0; x < universeSize; x++) {
+            for (int y = 0; y < universeSize; y++) {
+                int posX = x * cellSize + translateX;
+                int posY = y * cellSize + translateY;
+                if (posX > -cellSize && posX < bounds.width && posY > -cellSize && posY < bounds.height) {
+                    paintCell(graphics, posX, posY, drawSize, calculateCellColor(cells[x][y].value));
+                }
             }
-        });
+        }
     }
 
     private Color calculateCellColor(float cellValue) {
         if (cellValue > 1) {
             return new Color(0.75f, 0, 0);
         }
-        if (cellValue > Space.minEnergyState) {
-            float red = cellValue > Space.lifeThreshold ?
-                    0.5f * gradient(cellValue, 1 - Space.lifeThreshold, 1) : 0;
-            float green = cellValue > Space.lifeThreshold ?
-                    0.5f * gradient(cellValue, Space.highEnergyState - Space.lowEnergyState, Space.highEnergyState) : 0;
-            float blue = 0.5f * gradient(cellValue, Space.lifeThreshold - Space.minEnergyState, Space.lifeThreshold);
+        if (cellValue > lifeProps.getMinEnergyState()) {
+            float red = cellValue > lifeProps.getLifeEnergyThreshold() ?
+                    0.5f * gradient(cellValue, 1 - lifeProps.getLifeEnergyThreshold(), 1) : 0;
+            float green = cellValue > lifeProps.getLifeEnergyThreshold() ?
+                    0.5f * gradient(cellValue, lifeProps.getHighEnergyState() - lifeProps.getLowEnergyState(), lifeProps.getHighEnergyState()) : 0;
+            float blue = 0.5f * gradient(cellValue, lifeProps.getLifeEnergyThreshold() - lifeProps.getMinEnergyState(), lifeProps.getLifeEnergyThreshold());
             return new Color(red, green, blue);
         } else {
             float abs = Math.abs(cellValue);

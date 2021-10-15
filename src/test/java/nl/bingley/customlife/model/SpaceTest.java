@@ -1,71 +1,114 @@
 package nl.bingley.customlife.model;
 
+import nl.bingley.customlife.config.LifeProperties;
+import nl.bingley.customlife.config.UniverseProperties;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class SpaceTest {
 
     private Space space;
 
     @Test
-    public void testDyingCell() {
-        space = new Space(3);
-        Cell cell = getCellAtPosition(1, 1);
-        cell.value = Space.highEnergyState;
+    public void testGameOfLifeCellDeath() {
+        UniverseProperties universeProperties = mockGameOfLifeProperties(3);
+        LifeProperties props = universeProperties.getLifeProperties();
+        space = new Space(universeProperties, false);
+
+        Cell cell = space.findCell(1, 1);
+        cell.value = props.getHighEnergyState();
 
         space.update();
 
-        assertEquals(Space.lowEnergyState, cell.value);
-        List<Cell> cells = space.getAllCells();
-        cells.stream()
+        assertEquals(props.getLowEnergyState(), cell.value, createCellAssertMessage(cell));
+        Arrays.stream(space.getAllCells())
+                .flatMap(Arrays::stream)
                 .filter(neighbour -> neighbour.x != cell.x || neighbour.y != cell.y)
-                .forEach(neighbour ->
-                        assertEquals(Space.energyJump * (1f / (cells.size() - 1)), neighbour.value));
-        assertEquals(Space.highEnergyState, cells.stream().map(fin -> fin.value).reduce(Float::sum).get());
+                .forEach(neighbour -> assertEquals(0, neighbour.value, createCellAssertMessage(neighbour)));
     }
 
     @Test
-    public void testAntiCell() {
-        space = new Space(3);
-        Cell cell1 = getCellAtPosition(1, 1);
-        Cell cell2 = getCellAtPosition(1, 2);
-        cell1.value = 1;
-        cell2.value = -1;
+    public void testGameOfLifeCellBirth() {
+        UniverseProperties universeProperties = mockGameOfLifeProperties(5);
+        LifeProperties props = universeProperties.getLifeProperties();
+        space = new Space(universeProperties, false);
+
+        Cell cell1 = space.findCell(1, 2);
+        Cell cell2 = space.findCell(2, 2);
+        Cell cell3 = space.findCell(3, 2);
+        cell1.value = props.getHighEnergyState();
+        cell2.value = props.getHighEnergyState();
+        cell3.value = props.getHighEnergyState();
 
         space.update();
 
-        assertEquals(0, space.getAllCells().stream().map(fin -> fin.value).reduce(Float::sum).get());
+        assertEquals(props.getLowEnergyState(), cell1.value, createCellAssertMessage(cell1));
+        assertEquals(props.getHighEnergyState(), cell2.value, createCellAssertMessage(cell2));
+        assertEquals(props.getLowEnergyState(), cell3.value, createCellAssertMessage(cell3));
+
+        Cell newCell1 = space.findCell(2, 3);
+        Cell newCell2 = space.findCell(2, 1);
+        assertEquals(props.getHighEnergyState(), newCell1.value, createCellAssertMessage(newCell1));
+        assertEquals(props.getHighEnergyState(), newCell2.value, createCellAssertMessage(newCell2));
+        assertEquals(props.getHighEnergyState() * 3, countTotalEnergy());
     }
 
     @Test
-    public void testGrowCell() {
-        space = new Space(8);
-        Cell cell1 = getCellAtPosition(1, 2);
-        Cell cell2 = getCellAtPosition(2, 2);
-        Cell cell3 = getCellAtPosition(3, 2);
-        cell1.value = Space.highEnergyState;
-        cell2.value = Space.highEnergyState;
-        cell3.value = Space.highEnergyState;
+    public void testGameOfLifeCellLive() {
+        UniverseProperties universeProperties = mockGameOfLifeProperties(4);
+        LifeProperties props = universeProperties.getLifeProperties();
+        space = new Space(universeProperties, false);
+
+        Cell cell1 = space.findCell(1, 2);
+        Cell cell2 = space.findCell(2, 2);
+        Cell cell3 = space.findCell(2, 1);
+        Cell cell4 = space.findCell(1, 1);
+        cell1.value = props.getHighEnergyState();
+        cell2.value = props.getHighEnergyState();
+        cell3.value = props.getHighEnergyState();
+        cell4.value = props.getHighEnergyState();
 
         space.update();
 
-        assertEquals(Space.lowEnergyState * (1 / 4f), cell1.value);
-        assertEquals(Space.highEnergyState - 1 / 16f, cell2.value);
-        assertEquals(Space.lowEnergyState * (1 / 4f), cell3.value);
+        assertEquals(props.getHighEnergyState(), cell1.value, createCellAssertMessage(cell1));
+        assertEquals(props.getHighEnergyState(), cell2.value, createCellAssertMessage(cell2));
+        assertEquals(props.getHighEnergyState(), cell3.value, createCellAssertMessage(cell3));
+        assertEquals(props.getHighEnergyState(), cell4.value, createCellAssertMessage(cell4));
 
-        Cell newCell1 = getCellAtPosition(2, 3);
-        Cell newCell2 = getCellAtPosition(2, 1);
-        assertEquals(Space.highEnergyState + 1 / 8f, newCell1.value);
-        assertEquals(Space.highEnergyState + 1 / 8f, newCell2.value);
-        assertEquals(Space.highEnergyState * 3, space.getAllCells().stream().map(fin -> fin.value).reduce(Float::sum).get());
+        assertEquals(props.getHighEnergyState() * 4, countTotalEnergy());
     }
 
-    private Cell getCellAtPosition(int x, int y) {
-        return space.getAllCells().stream()
-                .filter(cell -> cell.x == x && cell.y == y)
-                .findFirst().get();
+    private float countTotalEnergy() {
+        return Arrays.stream(space.getAllCells())
+                .flatMap(Arrays::stream)
+                .map(fin -> fin.value).reduce(Float::sum).get();
+    }
+
+    private UniverseProperties mockGameOfLifeProperties(int size) {
+        LifeProperties lifeProps = mock(LifeProperties.class);
+        when(lifeProps.getLifeNeighbourhoodRadius()).thenReturn(1);
+        when(lifeProps.getBirthMax()).thenReturn(3);
+        when(lifeProps.getBirthMin()).thenReturn(3);
+        when(lifeProps.getSurviveMax()).thenReturn(3);
+        when(lifeProps.getSurviveMin()).thenReturn(2);
+        when(lifeProps.getLifeEnergyThreshold()).thenReturn(0.5f);
+        when(lifeProps.getHighEnergyState()).thenReturn(1f);
+        when(lifeProps.getLowEnergyState()).thenReturn(0f);
+        when(lifeProps.getMinEnergyState()).thenReturn(0f);
+        when(lifeProps.getEnergyNeighbourhoodRadius()).thenReturn(0);
+
+        UniverseProperties universeProps = mock(UniverseProperties.class);
+        when(universeProps.getSize()).thenReturn(size);
+        when(universeProps.getLifeProperties()).thenReturn(lifeProps);
+        return universeProps;
+    }
+
+    private String createCellAssertMessage(Cell cell) {
+        return String.format("Cell at %s/%s had value %f", cell.x, cell.y, cell.value);
     }
 }

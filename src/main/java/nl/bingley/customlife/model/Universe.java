@@ -1,17 +1,12 @@
 package nl.bingley.customlife.model;
 
+import nl.bingley.customlife.config.UniverseProperties;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class Universe {
 
-    public static final int size = 128;
-
-    private static final int spawnSize = 64;
-
+    private final UniverseProperties properties;
     private boolean paused = false;
 
     private int genPerSec = 2;
@@ -19,12 +14,14 @@ public class Universe {
     private int generation;
     private Space space;
 
-    public Universe() {
-        space = new Space(size, spawnSize);
+    public Universe(UniverseProperties properties) {
+        this.properties = properties;
+        space = new Space(properties, true);
     }
 
     public void reset() {
-        space = new Space(size, spawnSize);
+        space = new Space(properties, true);
+        generation = 0;
     }
 
     public void incrementGeneration() {
