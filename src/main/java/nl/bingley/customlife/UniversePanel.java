@@ -113,6 +113,10 @@ public class UniversePanel extends JPanel {
         return result < 0 ? 0 : result;
     }
 
+    public Cell findCellAtPixel(int pixelX, int pixelY) {
+        return universe.findCell((pixelX - translateX) / cellSize, (pixelY - translateY) / cellSize);
+    }
+
     public void zoomIn(int rawTranslateX, int rawTranslateY) {
         if (cellSize < 64) {
             translateX = (int) (translateX * ((cellSize * 2) / (double) cellSize));

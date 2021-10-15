@@ -72,7 +72,7 @@ public class Universe {
         return neighbours;
     }
 
-    protected Cell findCell(int posX, int posY) {
+    public Cell findCell(int posX, int posY) {
         int x = posX;
         int y = posY;
         if (posX < 0) x = cells.length + posX;
