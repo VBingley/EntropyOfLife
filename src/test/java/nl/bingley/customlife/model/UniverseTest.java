@@ -10,49 +10,46 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class SpaceTest {
+public class UniverseTest {
 
-    private Space space;
+    private Universe universe;
 
     @Test
     public void testGameOfLifeCellDeath() {
         UniverseProperties universeProperties = mockGameOfLifeProperties(3);
         LifeProperties props = universeProperties.getLifeProperties();
-        space = new Space(universeProperties, false);
+        universe = new Universe(universeProperties);
 
-        Cell cell = space.findCell(1, 1);
+        Cell cell = universe.findCell(1, 1);
         cell.value = props.getHighEnergyState();
 
-        space.update();
+        universe.nextGeneration();
 
         assertEquals(props.getLowEnergyState(), cell.value, createCellAssertMessage(cell));
-        Arrays.stream(space.getAllCells())
-                .flatMap(Arrays::stream)
-                .filter(neighbour -> neighbour.x != cell.x || neighbour.y != cell.y)
-                .forEach(neighbour -> assertEquals(0, neighbour.value, createCellAssertMessage(neighbour)));
+        assertEquals(0, countTotalEnergy());
     }
 
     @Test
     public void testGameOfLifeCellBirth() {
         UniverseProperties universeProperties = mockGameOfLifeProperties(5);
         LifeProperties props = universeProperties.getLifeProperties();
-        space = new Space(universeProperties, false);
+        universe = new Universe(universeProperties);
 
-        Cell cell1 = space.findCell(1, 2);
-        Cell cell2 = space.findCell(2, 2);
-        Cell cell3 = space.findCell(3, 2);
+        Cell cell1 = universe.findCell(1, 2);
+        Cell cell2 = universe.findCell(2, 2);
+        Cell cell3 = universe.findCell(3, 2);
         cell1.value = props.getHighEnergyState();
         cell2.value = props.getHighEnergyState();
         cell3.value = props.getHighEnergyState();
 
-        space.update();
+        universe.nextGeneration();
 
         assertEquals(props.getLowEnergyState(), cell1.value, createCellAssertMessage(cell1));
         assertEquals(props.getHighEnergyState(), cell2.value, createCellAssertMessage(cell2));
         assertEquals(props.getLowEnergyState(), cell3.value, createCellAssertMessage(cell3));
 
-        Cell newCell1 = space.findCell(2, 3);
-        Cell newCell2 = space.findCell(2, 1);
+        Cell newCell1 = universe.findCell(2, 3);
+        Cell newCell2 = universe.findCell(2, 1);
         assertEquals(props.getHighEnergyState(), newCell1.value, createCellAssertMessage(newCell1));
         assertEquals(props.getHighEnergyState(), newCell2.value, createCellAssertMessage(newCell2));
         assertEquals(props.getHighEnergyState() * 3, countTotalEnergy());
@@ -62,18 +59,18 @@ public class SpaceTest {
     public void testGameOfLifeCellLive() {
         UniverseProperties universeProperties = mockGameOfLifeProperties(4);
         LifeProperties props = universeProperties.getLifeProperties();
-        space = new Space(universeProperties, false);
+        universe = new Universe(universeProperties);
 
-        Cell cell1 = space.findCell(1, 2);
-        Cell cell2 = space.findCell(2, 2);
-        Cell cell3 = space.findCell(2, 1);
-        Cell cell4 = space.findCell(1, 1);
+        Cell cell1 = universe.findCell(1, 2);
+        Cell cell2 = universe.findCell(2, 2);
+        Cell cell3 = universe.findCell(2, 1);
+        Cell cell4 = universe.findCell(1, 1);
         cell1.value = props.getHighEnergyState();
         cell2.value = props.getHighEnergyState();
         cell3.value = props.getHighEnergyState();
         cell4.value = props.getHighEnergyState();
 
-        space.update();
+        universe.nextGeneration();
 
         assertEquals(props.getHighEnergyState(), cell1.value, createCellAssertMessage(cell1));
         assertEquals(props.getHighEnergyState(), cell2.value, createCellAssertMessage(cell2));
@@ -84,7 +81,7 @@ public class SpaceTest {
     }
 
     private float countTotalEnergy() {
-        return Arrays.stream(space.getAllCells())
+        return Arrays.stream(universe.getAllCells())
                 .flatMap(Arrays::stream)
                 .map(fin -> fin.value).reduce(Float::sum).get();
     }
@@ -105,6 +102,7 @@ public class SpaceTest {
         UniverseProperties universeProps = mock(UniverseProperties.class);
         when(universeProps.getSize()).thenReturn(size);
         when(universeProps.getLifeProperties()).thenReturn(lifeProps);
+        when(universeProps.isRandomized()).thenReturn(false);
         return universeProps;
     }
 

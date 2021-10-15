@@ -28,6 +28,10 @@ public class UniverseProperties {
         return spawnSize;
     }
 
+    public boolean isRandomized() {
+        return true;
+    }
+
     public LifeProperties getLifeProperties() {
         return lifeProperties;
     }

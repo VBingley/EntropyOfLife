@@ -3,15 +3,12 @@ package nl.bingley.customlife;
 import nl.bingley.customlife.config.LifeProperties;
 import nl.bingley.customlife.config.UniverseProperties;
 import nl.bingley.customlife.model.Cell;
-import nl.bingley.customlife.model.Space;
 import nl.bingley.customlife.model.Universe;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,8 +38,7 @@ public class UniversePanel extends JPanel {
         painting = true;
         paintBackground(graphics);
 
-        Space space = universe.getSpace();
-        Cell[][] allCells = space.getAllCells();
+        Cell[][] allCells = universe.getAllCells();
 
         paintCells(graphics, allCells);
         paintInfo(graphics, allCells);

@@ -11,12 +11,12 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
 @Component
-public class MovementListener implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class MouseInputListener implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     private final UniversePanel universePanel;
     private Point origin;
 
-    public MovementListener(UniversePanel universePanel) {
+    public MouseInputListener(UniversePanel universePanel) {
         this.universePanel = universePanel;
         origin = new Point();
     }

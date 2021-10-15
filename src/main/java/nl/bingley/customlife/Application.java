@@ -1,7 +1,7 @@
 package nl.bingley.customlife;
 
-import nl.bingley.customlife.listeners.MovementListener;
-import nl.bingley.customlife.listeners.SettingsListener;
+import nl.bingley.customlife.listeners.MouseInputListener;
+import nl.bingley.customlife.listeners.KeyInputListener;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,13 +15,13 @@ import java.awt.*;
 public class Application {
 
     private final UniversePanel universePanel;
-    private final SettingsListener settingsListener;
-    private final MovementListener movementListener;
+    private final KeyInputListener keyInputListener;
+    private final MouseInputListener mouseInputListener;
 
-    public Application(UniversePanel universePanel, SettingsListener settingsListener, MovementListener movementListener) {
+    public Application(UniversePanel universePanel, KeyInputListener keyInputListener, MouseInputListener mouseInputListener) {
         this.universePanel = universePanel;
-        this.settingsListener = settingsListener;
-        this.movementListener = movementListener;
+        this.keyInputListener = keyInputListener;
+        this.mouseInputListener = mouseInputListener;
     }
 
     //Guns, these produce gliders
@@ -45,10 +45,10 @@ public class Application {
         Font font = new Font(Font.MONOSPACED, Font.BOLD, 20);
         universePanel.setFont(font);
         universePanel.setFocusable(true);
-        universePanel.addKeyListener(settingsListener);
-        universePanel.addMouseListener(movementListener);
-        universePanel.addMouseMotionListener(movementListener);
-        universePanel.addMouseWheelListener(movementListener);
+        universePanel.addKeyListener(keyInputListener);
+        universePanel.addMouseListener(mouseInputListener);
+        universePanel.addMouseMotionListener(mouseInputListener);
+        universePanel.addMouseWheelListener(mouseInputListener);
         frame.getContentPane().add(universePanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 1000);

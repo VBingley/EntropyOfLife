@@ -23,7 +23,7 @@ public class TickTimerTask extends TimerTask {
     public void run() {
         if (!universe.isPaused() && lastTick < System.currentTimeMillis() - Math.floor(1000d/universe.getGenPerSec())) {
             updateFpsTimer();
-            universe.incrementGeneration();
+            universe.nextGeneration();
             lastTick = System.currentTimeMillis();
         } else if (universe.isPaused()) {
             lastTick = System.currentTimeMillis();

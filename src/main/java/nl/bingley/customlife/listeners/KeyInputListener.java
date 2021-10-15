@@ -7,11 +7,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 @Component
-public class SettingsListener implements KeyListener {
+public class KeyInputListener implements KeyListener {
 
     private final Universe universe;
 
-    public SettingsListener(Universe universe) {
+    public KeyInputListener(Universe universe) {
         this.universe = universe;
     }
 
@@ -34,7 +34,7 @@ public class SettingsListener implements KeyListener {
                 break;
             case KeyEvent.VK_RIGHT:
                 if (universe.isPaused()) {
-                    universe.incrementGeneration();
+                    universe.nextGeneration();
                 }
                 break;
             case KeyEvent.VK_P:
