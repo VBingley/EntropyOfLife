@@ -21,7 +21,7 @@ public class CellStateUtil {
     public void gainEnergy(float energy, Cell cell, List<Cell> energyNeighbours) {
         if (energy > 0 && props.getEnergyNeighbourhoodRadius() != 0) {
             List<Cell> energeticNeighbours = energyNeighbours.stream()
-                    .filter(neighbour -> neighbour.value >= 0)
+                    .filter(neighbour -> neighbour.oldValue > 0)
                     .collect(Collectors.toList());
             if (energeticNeighbours.size() > 0) {
                 cell.value += cell.oldValue + energy;

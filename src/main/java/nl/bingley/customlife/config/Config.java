@@ -14,7 +14,7 @@ public class Config {
 
     @Bean
     public Timer rendererTimer(Renderer renderer) {
-        Timer timer = new Timer(32, renderer);
+        Timer timer = new Timer(20, renderer);
         timer.start();
         return timer;
     }

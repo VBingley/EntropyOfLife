@@ -47,11 +47,7 @@ public class UniversePanel extends JPanel {
     private void paintBackground(Graphics graphics) {
         graphics.setColor(Color.BLACK);
         Rectangle bounds = graphics.getClipBounds();
-        graphics.fillRect(0, 0, bounds.width, translateY);
-        graphics.fillRect(0, 0, translateX, bounds.height);
-        int universeScaled = cellSize * universeSize;
-        graphics.fillRect(0, translateY + universeScaled, bounds.width, bounds.height - translateY);
-        graphics.fillRect(translateX + universeScaled, 0, bounds.width - translateX, bounds.height);
+        graphics.fillRect(0, 0, bounds.width, bounds.height);
     }
 
     private void paintInfo(Graphics graphics, Cell[][] allCells) {
@@ -84,6 +80,11 @@ public class UniversePanel extends JPanel {
         }
     }
 
+    private void paintCell(Graphics graphics, int posX, int posY, int size, Color fill) {
+        graphics.setColor(fill);
+        graphics.fillRect(posX, posY, size, size);
+    }
+
     private Color calculateCellColor(float cellValue) {
         if (cellValue > 1) {
             return new Color(0.75f, 0, 0);
@@ -110,13 +111,6 @@ public class UniversePanel extends JPanel {
         float location = value - peak + radius;
         float result = (float) Math.sin((location / (radius * 2)) * Math.PI);
         return result < 0 ? 0 : result;
-    }
-
-    private void paintCell(Graphics graphics, int posX, int posY, int size, Color fill) {
-        graphics.setColor(Color.BLACK);
-        graphics.fillRect(posX, posY, cellSize, cellSize);
-        graphics.setColor(fill);
-        graphics.fillRect(posX, posY, size, size);
     }
 
     public void zoomIn(int rawTranslateX, int rawTranslateY) {

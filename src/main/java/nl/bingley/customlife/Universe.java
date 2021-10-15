@@ -46,7 +46,7 @@ public class Universe {
                 });
         // Update
         Arrays.stream(cells).flatMap(Arrays::stream)
-                //.parallel()
+                .parallel()
                 .forEach(this::updateCell);
     }
 
@@ -72,11 +72,13 @@ public class Universe {
         return neighbours;
     }
 
-    protected Cell findCell(int x, int y) {
-        if (x < 0) x = cells.length + x;
-        if (x >= cells.length) x = x - cells.length;
-        if (y < 0) y = cells.length + y;
-        if (y >= cells.length) y = y - cells.length;
+    protected Cell findCell(int posX, int posY) {
+        int x = posX;
+        int y = posY;
+        if (posX < 0) x = cells.length + posX;
+        if (posX >= cells.length) x = posX - cells.length;
+        if (posY < 0) y = cells.length + posY;
+        if (posY >= cells.length) y = posY - cells.length;
         return cells[x][y];
     }
 
@@ -86,9 +88,9 @@ public class Universe {
             for (int y = 0; y < size; y++) {
                 int margin = (int) (size * 0.5 - spawnSize * 0.5);
                 if (x >= margin && x <= size - margin && y >= margin && y <= size - margin) {
-                    cells[x][y] = new Cell(x, y, random.nextFloat());
+                    cells[x][y] = new Cell(x, y, random.nextFloat() * props.getHighEnergyState());
                 } else {
-                    cells[x][y] = new Cell(x, y, random.nextFloat() * props.getLowEnergyState());
+                    cells[x][y] = new Cell(x, y, random.nextFloat() * props.getLowEnergyState() * 2);
                 }
             }
         }

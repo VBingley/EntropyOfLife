@@ -30,10 +30,10 @@ public class KeyInputListener implements KeyListener {
                 universe.reset();
                 break;
             case KeyEvent.VK_UP:
-                universeUpdateTimer.setDelay((int) Math.floor(universeUpdateTimer.getDelay() * 0.5));
+                changeGenerationsPerSecond(0.5f);
                 break;
             case KeyEvent.VK_DOWN:
-                universeUpdateTimer.setDelay((int) Math.floor(universeUpdateTimer.getDelay() * 2));
+                changeGenerationsPerSecond(2f);
                 break;
             case KeyEvent.VK_RIGHT:
                 if (universe.isPaused()) {
@@ -55,5 +55,12 @@ public class KeyInputListener implements KeyListener {
     @Override
     public void keyReleased(KeyEvent keyEvent) {
 
+    }
+
+    private void changeGenerationsPerSecond(float multiplier) {
+        int delay = universeUpdateTimer.getDelay();
+        if ((multiplier > 1 && delay < 1000) || (multiplier < 1 && delay > 16)) {
+            universeUpdateTimer.setDelay((int) Math.floor(universeUpdateTimer.getDelay() * multiplier));
+        }
     }
 }
