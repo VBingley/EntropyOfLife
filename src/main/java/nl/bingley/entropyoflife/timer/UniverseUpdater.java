@@ -1,6 +1,7 @@
-package nl.bingley.customlife.timer;
+package nl.bingley.entropyoflife.timer;
 
-import nl.bingley.customlife.Universe;
+import nl.bingley.entropyoflife.Universe;
+import nl.bingley.entropyoflife.UniversePanel;
 import org.springframework.stereotype.Component;
 
 import java.awt.event.ActionEvent;
@@ -10,33 +11,32 @@ import java.awt.event.ActionListener;
 public class UniverseUpdater implements ActionListener {
 
     private final Universe universe;
-    private long lastTick;
-    private long genPerSecTimer;
-    private int genPersecCounter = 0;
+    private final UniversePanel panel;
 
-    public UniverseUpdater(Universe universe) {
+    private boolean isPaused = false;
+    private long genPerSecTimer;
+    private int genPerSecCounter = 0;
+
+    public UniverseUpdater(Universe universe, UniversePanel universePanel) {
         this.universe = universe;
-        lastTick = System.currentTimeMillis();
+        this.panel = universePanel;
         genPerSecTimer = System.currentTimeMillis();
     }
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (!universe.isPaused()) {
+        if (!isPaused) {
             updateGenPerSecTimer();
             universe.nextGeneration();
-            lastTick = System.currentTimeMillis();
-        } else if (universe.isPaused()) {
-            lastTick = System.currentTimeMillis();
         }
     }
 
     private void updateGenPerSecTimer() {
-        if (System.currentTimeMillis() > genPerSecTimer + 1000 ) {
+        if (System.currentTimeMillis() > genPerSecTimer + 1000) {
             genPerSecTimer = System.currentTimeMillis();
-            universe.setGenPerSec(genPersecCounter);
-            genPersecCounter = 0;
+            panel.setGenPerSec(genPerSecCounter);
+            genPerSecCounter = 0;
         }
-            genPersecCounter++;
+        genPerSecCounter++;
     }
 }

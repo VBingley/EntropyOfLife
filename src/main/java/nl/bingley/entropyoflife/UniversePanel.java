@@ -1,8 +1,8 @@
-package nl.bingley.customlife;
+package nl.bingley.entropyoflife;
 
-import nl.bingley.customlife.config.LifeProperties;
-import nl.bingley.customlife.config.UniverseProperties;
-import nl.bingley.customlife.model.Cell;
+import nl.bingley.entropyoflife.config.LifeProperties;
+import nl.bingley.entropyoflife.config.UniverseProperties;
+import nl.bingley.entropyoflife.model.Cell;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -22,6 +22,8 @@ public class UniversePanel extends JPanel {
     private int translateY = 0;
     private int cellSize = 5;
 
+    private int genPerSec = 0;
+
     private final Universe universe;
 
     public UniversePanel(Universe universe, UniverseProperties universeProperties) {
@@ -33,11 +35,9 @@ public class UniversePanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics graphics) {
-
         paintBackground(graphics);
 
         Cell[][] allCells = universe.getAllCells();
-
         paintCells(graphics, allCells);
         paintInfo(graphics, allCells);
 
@@ -59,7 +59,7 @@ public class UniversePanel extends JPanel {
                 .count();
         graphics.setColor(Color.RED);
         graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
-        graphics.drawString("Gen/s:  " + universe.getGenPerSec(), 10, 40);
+        graphics.drawString("Gen/s:  " + genPerSec, 10, 40);
         graphics.drawString("Net E: " + Math.round(cells.stream().map(cell -> cell.value).reduce(Float::sum).orElse(-1f)), 10, 60);
         graphics.drawString("Abs E: " + Math.round(cells.stream().map(cell -> Math.abs(cell.value)).reduce(Float::sum).orElse(-1f)), 10, 80);
         graphics.drawString("Alive: " + aliveCount, 10, 100);
@@ -117,22 +117,22 @@ public class UniversePanel extends JPanel {
         return universe.findCell((pixelX - translateX) / cellSize, (pixelY - translateY) / cellSize);
     }
 
-    public void zoomIn(int rawTranslateX, int rawTranslateY) {
+    public void zoomIn(int focusX, int focusY) {
         if (cellSize < 64) {
-            translateX = (int) (translateX * ((cellSize * 2) / (double) cellSize));
-            translateY = (int) (translateY * ((cellSize * 2) / (double) cellSize));
-            translateX = translateX + rawTranslateX;
-            translateY = translateY + rawTranslateY;
+            translateX = (int) (translateX * ((cellSize * 2) / cellSize));
+            translateY = (int) (translateY * ((cellSize * 2) / cellSize));
+            translateX = translateX - focusX;
+            translateY = translateY - focusY;
             cellSize = cellSize * 2;
         }
     }
 
-    public void zoomOut(int rawTranslateX, int rawTranslateY) {
+    public void zoomOut(int focusX, int focusY) {
         if (cellSize > 1) {
-            translateX = (int) (translateX * ((cellSize / 2) / (double) cellSize));
-            translateY = (int) (translateY * ((cellSize / 2) / (double) cellSize));
-            translateX = translateX - rawTranslateX / 2;
-            translateY = translateY - rawTranslateY / 2;
+            translateX = (int) (translateX * ((cellSize / 2d) / cellSize));
+            translateY = (int) (translateY * ((cellSize / 2d) / cellSize));
+            translateX = translateX + focusX / 2;
+            translateY = translateY + focusY / 2;
             cellSize = cellSize / 2;
         }
     }
@@ -143,5 +143,9 @@ public class UniversePanel extends JPanel {
 
     public void addTranslateY(int translateY) {
         this.translateY += translateY;
+    }
+
+    public void setGenPerSec(int genPerSec) {
+        this.genPerSec = genPerSec;
     }
 }

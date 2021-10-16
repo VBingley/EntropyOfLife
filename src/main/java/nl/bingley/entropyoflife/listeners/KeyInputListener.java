@@ -1,6 +1,6 @@
-package nl.bingley.customlife.listeners;
+package nl.bingley.entropyoflife.listeners;
 
-import nl.bingley.customlife.Universe;
+import nl.bingley.entropyoflife.Universe;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -22,7 +22,7 @@ public class KeyInputListener implements KeyListener {
     public void keyPressed(KeyEvent keyEvent) {
         switch (keyEvent.getKeyCode()) {
             case KeyEvent.VK_SPACE:
-                universe.setPaused(!universe.isPaused());
+                togglePause();
                 break;
             case KeyEvent.VK_ENTER:
             case KeyEvent.VK_R:
@@ -36,7 +36,7 @@ public class KeyInputListener implements KeyListener {
                 changeGenerationsPerSecond(2f);
                 break;
             case KeyEvent.VK_RIGHT:
-                if (universe.isPaused()) {
+                if (!universeUpdateTimer.isRunning()) {
                     universe.nextGeneration();
                 }
                 break;
@@ -55,6 +55,14 @@ public class KeyInputListener implements KeyListener {
     @Override
     public void keyReleased(KeyEvent keyEvent) {
 
+    }
+
+    private void togglePause() {
+        if (universeUpdateTimer.isRunning()) {
+            universeUpdateTimer.stop();
+        } else {
+            universeUpdateTimer.start();
+        }
     }
 
     private void changeGenerationsPerSecond(float multiplier) {

@@ -1,14 +1,14 @@
-package nl.bingley.customlife.config;
+package nl.bingley.entropyoflife.config;
 
-import nl.bingley.customlife.timer.Renderer;
-import nl.bingley.customlife.timer.UniverseUpdater;
+import nl.bingley.entropyoflife.timer.Renderer;
+import nl.bingley.entropyoflife.timer.UniverseUpdater;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import javax.swing.*;
 
-@ComponentScan("nl.bingley.customlife")
+@ComponentScan("nl.bingley.entropyoflife")
 @Configuration
 public class Config {
 

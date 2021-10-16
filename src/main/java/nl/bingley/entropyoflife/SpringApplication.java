@@ -1,7 +1,7 @@
-package nl.bingley.customlife;
+package nl.bingley.entropyoflife;
 
-import nl.bingley.customlife.listeners.MouseInputListener;
-import nl.bingley.customlife.listeners.KeyInputListener;
+import nl.bingley.entropyoflife.listeners.MouseInputListener;
+import nl.bingley.entropyoflife.listeners.KeyInputListener;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
@@ -10,7 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.swing.*;
 import java.awt.*;
 
-@ComponentScan("nl.bingley.customlife.config")
+@ComponentScan("nl.bingley.entropyoflife.config")
 @SpringBootApplication
 public class SpringApplication {
 

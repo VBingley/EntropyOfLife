@@ -1,9 +1,9 @@
-package nl.bingley.customlife.listeners;
+package nl.bingley.entropyoflife.listeners;
 
-import nl.bingley.customlife.UniversePanel;
-import nl.bingley.customlife.config.LifeProperties;
-import nl.bingley.customlife.config.UniverseProperties;
-import nl.bingley.customlife.model.Cell;
+import nl.bingley.entropyoflife.UniversePanel;
+import nl.bingley.entropyoflife.config.LifeProperties;
+import nl.bingley.entropyoflife.config.UniverseProperties;
+import nl.bingley.entropyoflife.model.Cell;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -62,9 +62,9 @@ public class MouseInputListener implements MouseListener, MouseMotionListener, M
     public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
         Point point = mouseWheelEvent.getPoint();
         if (mouseWheelEvent.getWheelRotation() < 0) {
-            universePanel.zoomIn(-point.x, -point.y);
+            universePanel.zoomIn(point.x, point.y);
         } else {
-            universePanel.zoomOut(-point.x, -point.y);
+            universePanel.zoomOut(point.x, point.y);
         }
     }
 

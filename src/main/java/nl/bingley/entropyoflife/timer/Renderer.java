@@ -1,6 +1,6 @@
-package nl.bingley.customlife.timer;
+package nl.bingley.entropyoflife.timer;
 
-import nl.bingley.customlife.UniversePanel;
+import nl.bingley.entropyoflife.UniversePanel;
 import org.springframework.stereotype.Component;
 
 import java.awt.event.ActionEvent;
