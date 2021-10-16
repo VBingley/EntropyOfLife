@@ -53,11 +53,7 @@ public class Universe {
     private void updateCell(Cell cell) {
         int livingNeighbours = cellStateUtil.countLivingCells(findAllNeighbours(cell, props.getLifeNeighbourhoodRadius()));
         float energyDelta = cellStateUtil.calculateEnergyDelta(cell, livingNeighbours);
-        if (energyDelta != 0) {
-            cellStateUtil.gainEnergy(energyDelta, cell, findAllNeighbours(cell, props.getEnergyNeighbourhoodRadius()));
-        } else {
-            cell.value += cell.oldValue;
-        }
+        cellStateUtil.gainEnergy(energyDelta, cell, findAllNeighbours(cell, props.getEnergyNeighbourhoodRadius()));
     }
 
     private List<Cell> findAllNeighbours(Cell centerCell, int radius) {

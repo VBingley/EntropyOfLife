@@ -13,4 +13,8 @@ public class Cell {
         this.value = value;
         oldValue = value;
     }
+
+    public synchronized void addToNewValue(float value) {
+        this.value += value;
+    }
 }

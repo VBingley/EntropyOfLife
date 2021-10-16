@@ -15,7 +15,7 @@ public class CellStateUtil {
     public CellStateUtil(LifeProperties lifeProperties) {
         props = lifeProperties;
         energyJump = props.getHighEnergyState() - props.getLowEnergyState();
-        energyStep = Math.min(props.getLowEnergyState() *0.5f, energyJump * 0.5f);
+        energyStep = Math.min(props.getLowEnergyState() * 0.5f, energyJump * 0.5f);
     }
 
     public void gainEnergy(float energy, Cell cell, List<Cell> energyNeighbours) {
@@ -24,14 +24,16 @@ public class CellStateUtil {
                     .filter(neighbour -> neighbour.oldValue > 0)
                     .collect(Collectors.toList());
             if (energeticNeighbours.size() > 0) {
-                cell.value += cell.oldValue + energy;
-                energeticNeighbours.forEach(neighbour -> neighbour.value -= energy * (1f / energeticNeighbours.size()));
+                cell.addToNewValue(cell.oldValue + energy);
+                energeticNeighbours.forEach(neighbour -> neighbour.addToNewValue(-(energy * (1f / energeticNeighbours.size()))));
             } else {
-                cell.value += cell.oldValue;
+                cell.addToNewValue(cell.oldValue);
             }
+        } else if (props.getEnergyNeighbourhoodRadius() != 0) {
+            cell.addToNewValue(cell.oldValue + energy);
+            energyNeighbours.forEach(neighbour -> neighbour.addToNewValue(-energy * (1f / energyNeighbours.size())));
         } else {
-            cell.value += cell.oldValue + energy;
-            energyNeighbours.forEach(neighbour -> neighbour.value -= energy * (1f / energyNeighbours.size()));
+            cell.addToNewValue(cell.oldValue + energy);
         }
     }
 
