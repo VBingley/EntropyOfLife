@@ -16,8 +16,8 @@ public class UniverseProperties {
 
     private final LifeProperties lifeProperties;
 
-    public UniverseProperties(Environment env, @Value("${life.mode}") String mode) {
-        lifeProperties = new LifeProperties(env, mode);
+    public UniverseProperties(Environment env, @Value("${life.ruleset}") String ruleset) {
+        lifeProperties = new LifeProperties(env, ruleset);
     }
 
     public int getSize() {

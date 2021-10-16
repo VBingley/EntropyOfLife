@@ -28,26 +28,31 @@ public class LifeProperties {
     private final float lowEnergyState;
     private final float minEnergyState;
 
-    private final Environment env;
-    private final String mode;
+    private final float energyJump;
+    private final float energyStep;
 
-    public LifeProperties(Environment env, String mode) {
+    private final Environment env;
+    private final String ruleset;
+
+    public LifeProperties(Environment env, String ruleset) {
         this.env = env;
-        this.mode = mode;
-        birthMax = env.getRequiredProperty(String.format(BIRTH_MAX, mode), Integer.class);
-        birthMin = env.getRequiredProperty(String.format(BIRTH_MIN, mode), Integer.class);
-        surviveMax = env.getRequiredProperty(String.format(SURVIVE_MAX, mode), Integer.class);
-        surviveMin = env.getRequiredProperty(String.format(SURVIVE_MIN, mode), Integer.class);
-        lifeNeighbourhoodRadius = env.getRequiredProperty(String.format(LIFE_NEIGHBOURHOOD_RADIUS, mode), Integer.class);
+        this.ruleset = ruleset;
+        birthMax = env.getRequiredProperty(String.format(BIRTH_MAX, ruleset), Integer.class);
+        birthMin = env.getRequiredProperty(String.format(BIRTH_MIN, ruleset), Integer.class);
+        surviveMax = env.getRequiredProperty(String.format(SURVIVE_MAX, ruleset), Integer.class);
+        surviveMin = env.getRequiredProperty(String.format(SURVIVE_MIN, ruleset), Integer.class);
+        lifeNeighbourhoodRadius = env.getRequiredProperty(String.format(LIFE_NEIGHBOURHOOD_RADIUS, ruleset), Integer.class);
         lifeEnergyThreshold = setOptional(LIFE_ENERGY_THRESHOLD);
         highEnergyState = setOptional(HIGH_ENERGY_STATE);
         lowEnergyState = setOptional(LOW_ENERGY_STATE);
         minEnergyState = setOptional(MIN_ENERGY_STATE);
         energyNeighbourhoodRadius = setOptional(ENERGY_NEIGHBOURHOOD_RADIUS).intValue();
+        energyJump = highEnergyState - lowEnergyState;
+        energyStep = Math.min(lowEnergyState * 0.5f, energyJump * 0.5f);
     }
 
     private Float setOptional(String property) {
-        Float value = env.getProperty(String.format(property, mode), Float.class);
+        Float value = env.getProperty(String.format(property, ruleset), Float.class);
         if (value != null) {
             return value;
         } else {
@@ -93,5 +98,13 @@ public class LifeProperties {
 
     public int getSurviveMin() {
         return surviveMin;
+    }
+
+    public float getEnergyJump() {
+        return energyJump;
+    }
+
+    public float getEnergyStep() {
+        return energyStep;
     }
 }
