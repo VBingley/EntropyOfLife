@@ -8,35 +8,33 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @Component
 public class Universe {
 
     private final EnergyStateCalculator calculator;
 
-    private final int energyNeighbourhoodRadius;
-    private final int lifeNeighbourhoodRadius;
     private final int size;
     private final int spawnSize;
-
-    private int generation;
+    private final LifeProperties lifeProps;
 
     private final float[][] delta;
     private final Cell[][] cells;
 
+    private int generation;
+
     public Universe(EnergyStateCalculator calculator, UniverseProperties uniProps) {
         this.calculator = calculator;
 
-        LifeProperties lifeProps = uniProps.getLifeProperties();
-        energyNeighbourhoodRadius = lifeProps.getEnergyNeighbourhoodRadius();
-        lifeNeighbourhoodRadius = lifeProps.getLifeNeighbourhoodRadius();
-
+        lifeProps = uniProps.getLifeProperties();
         size = uniProps.getSize();
         spawnSize = uniProps.getSpawnSize();
         cells = new Cell[size][size];
         delta = new float[size][size];
+        long seed = uniProps.getRandomSeed() != 0 ? uniProps.getRandomSeed() : System.nanoTime();
         if (uniProps.isRandomized()) {
-            initializeRandom(size, spawnSize);
+            initializeRandom(size, spawnSize, seed);
         } else {
             initializeEmpty(size);
         }
@@ -54,12 +52,12 @@ public class Universe {
     }
 
     private float calculateTotalEnergyDelta(Cell cell) {
-        float neighbourhoodDelta = calculateNeighbourhoodDelta(cell, energyNeighbourhoodRadius);
+        float neighbourhoodDelta = calculateNeighbourhoodDelta(cell, lifeProps.getEnergyNeighbourhoodRadius());
         return delta[cell.x][cell.y] - neighbourhoodDelta;
     }
 
     private void calculateEnergyDelta(Cell cell) {
-        int livingNeighbours = calculator.countLivingCells(findAllNeighbours(cell, lifeNeighbourhoodRadius));
+        int livingNeighbours = calculator.countLivingCells(findAllNeighbours(cell, lifeProps.getLifeNeighbourhoodRadius()));
         delta[cell.x][cell.y] = calculator.calculateEnergyDelta(cell, livingNeighbours);
     }
 
@@ -98,14 +96,18 @@ public class Universe {
         return cells[coordinateToCell(x)][coordinateToCell(y)];
     }
 
-    private void initializeRandom(int size, int spawnSize) {
+    private void initializeRandom(int size, int spawnSize, long seed) {
+        Random random = new Random(seed);
+        System.out.println("Random seed: " + seed);
+        float highEnergyState = lifeProps.getHighEnergyState();
+        float lowEnergyState = lifeProps.getLowEnergyState();
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 int margin = (int) (size * 0.5 - spawnSize * 0.5);
                 if (x >= margin && x <= size - margin && y >= margin && y <= size - margin) {
-                    cells[x][y] = new Cell(x, y, calculator.randomHighEnergyState());
+                    cells[x][y] = new Cell(x, y, random.nextBoolean() ? highEnergyState : lowEnergyState);
                 } else {
-                    cells[x][y] = new Cell(x, y, calculator.randomLowEnergyState());
+                    cells[x][y] = new Cell(x, y, 0.5f * lowEnergyState + random.nextFloat() * 0.5f * lowEnergyState);
                 }
             }
         }
@@ -120,7 +122,7 @@ public class Universe {
     }
 
     public void reset() {
-        initializeRandom(size, spawnSize);
+        initializeRandom(size, spawnSize, System.nanoTime());
         generation = 0;
     }
 

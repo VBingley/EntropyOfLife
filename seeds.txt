@@ -1,0 +1,2 @@
+Seed                ruleset     result
+125409729025800     r10bugs     bug moving down

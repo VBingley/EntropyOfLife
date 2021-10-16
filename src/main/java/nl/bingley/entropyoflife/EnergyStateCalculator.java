@@ -6,17 +6,14 @@ import nl.bingley.entropyoflife.model.Cell;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Random;
 
 @Component
 public class EnergyStateCalculator {
 
     private final LifeProperties props;
-    private final Random random;
 
     public EnergyStateCalculator(UniverseProperties universeProperties) {
         props = universeProperties.getLifeProperties();
-        random = new Random();
     }
 
     public float calculateEnergyDelta(Cell cell, int livingNeighbours) {
@@ -50,14 +47,6 @@ public class EnergyStateCalculator {
 
     public int countLivingCells(List<Cell> cells) {
         return (int) cells.stream().filter(this::isAlive).count();
-    }
-
-    public float randomHighEnergyState() {
-        return random.nextBoolean() ? props.getHighEnergyState() : props.getLowEnergyState();
-    }
-
-    public float randomLowEnergyState() {
-        return 0.5f * props.getLowEnergyState() + 0.5f * random.nextFloat() * props.getLowEnergyState();
     }
 
     private boolean isAlive(Cell cell) {

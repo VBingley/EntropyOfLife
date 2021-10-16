@@ -13,6 +13,8 @@ public class UniverseProperties {
     private int size;
     @Value("${life.universe.spawn}")
     private int spawnSize;
+    @Value("${life.universe.random-seed:0}")
+    private long randomSeed;
 
     private final LifeProperties lifeProperties;
 
@@ -26,6 +28,10 @@ public class UniverseProperties {
 
     public int getSpawnSize() {
         return spawnSize;
+    }
+
+    public long getRandomSeed() {
+        return randomSeed;
     }
 
     public boolean isRandomized() {
