@@ -19,7 +19,7 @@ Button | Action
 Left mouse button | Manually paint or erase cells
 Right mouse button | Drag to move the view
 Scroll wheel | Zoom in or out
-Enter | Reset and randomize
+Enter/backspace/R | Reset and randomize
 Space | Pause/unpause
 Up/down arrow keys | Increase/Decrease generations per second
 Right arrow key | While paused, go to the next generation
