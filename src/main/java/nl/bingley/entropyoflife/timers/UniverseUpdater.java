@@ -1,6 +1,6 @@
-package nl.bingley.entropyoflife.timer;
+package nl.bingley.entropyoflife.timers;
 
-import nl.bingley.entropyoflife.Universe;
+import nl.bingley.entropyoflife.services.UniverseStateCalculator;
 import nl.bingley.entropyoflife.UniversePanel;
 import org.springframework.stereotype.Component;
 
@@ -10,15 +10,15 @@ import java.awt.event.ActionListener;
 @Component
 public class UniverseUpdater implements ActionListener {
 
-    private final Universe universe;
+    private final UniverseStateCalculator universeStateCalculator;
     private final UniversePanel panel;
 
     private boolean isPaused = false;
     private long genPerSecTimer;
     private int genPerSecCounter = 0;
 
-    public UniverseUpdater(Universe universe, UniversePanel universePanel) {
-        this.universe = universe;
+    public UniverseUpdater(UniverseStateCalculator universeStateCalculator, UniversePanel universePanel) {
+        this.universeStateCalculator = universeStateCalculator;
         this.panel = universePanel;
         genPerSecTimer = System.currentTimeMillis();
     }
@@ -27,7 +27,7 @@ public class UniverseUpdater implements ActionListener {
     public void actionPerformed(ActionEvent event) {
         if (!isPaused) {
             updateGenPerSecTimer();
-            universe.nextGeneration();
+            universeStateCalculator.nextGeneration();
         }
     }
 

@@ -1,7 +1,7 @@
 package nl.bingley.entropyoflife.config;
 
-import nl.bingley.entropyoflife.timer.Renderer;
-import nl.bingley.entropyoflife.timer.UniverseUpdater;
+import nl.bingley.entropyoflife.timers.Renderer;
+import nl.bingley.entropyoflife.timers.UniverseUpdater;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

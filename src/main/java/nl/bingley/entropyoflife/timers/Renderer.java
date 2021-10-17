@@ -1,4 +1,4 @@
-package nl.bingley.entropyoflife.timer;
+package nl.bingley.entropyoflife.timers;
 
 import nl.bingley.entropyoflife.UniversePanel;
 import org.springframework.stereotype.Component;

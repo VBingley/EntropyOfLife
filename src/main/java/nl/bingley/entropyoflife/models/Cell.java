@@ -1,4 +1,4 @@
-package nl.bingley.entropyoflife.model;
+package nl.bingley.entropyoflife.models;
 
 public class Cell {
 
