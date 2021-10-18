@@ -24,7 +24,26 @@ public class EnergyKernelTest {
         lifeProperties = universeProperties.getLifeProperties();
         universe = new Universe(universeProperties.getSize());
         range = Range.create2D(universeProperties.getSize(), universeProperties.getSize());
-        energyKernel = new EnergyKernel(universe, universeProperties);
+        energyKernel = new EnergyKernel(universe, universeProperties, 0, 1024, 1024);
+    }
+
+    @Test
+    public void testBasicDeltaTransformation() {
+        float[][] energyMatrix = universe.energyMatrix;
+        energyMatrix[1][2] = lifeProperties.getHighEnergyState();
+        energyMatrix[2][2] = lifeProperties.getHighEnergyState();
+        energyMatrix[3][2] = lifeProperties.getHighEnergyState();
+
+        energyKernel.execute(range);
+        energyKernel.get(universe.deltaMatrix);
+
+        float[][] deltaMatrix = universe.deltaMatrix;
+        assertEnergyValue(-lifeProperties.getEnergyJump(), deltaMatrix[1][2]);
+        assertEnergyValue(0, deltaMatrix[2][2]);
+        assertEnergyValue(-lifeProperties.getEnergyJump(), deltaMatrix[3][2]);
+        assertEnergyValue(lifeProperties.getEnergyJump(), deltaMatrix[2][1]);
+        assertEnergyValue(lifeProperties.getEnergyJump(), deltaMatrix[2][3]);
+        assertEquals(0f, countTotalEnergy(deltaMatrix));
     }
 
     @Test
@@ -34,6 +53,7 @@ public class EnergyKernelTest {
         deltaMatrix[2][2] = 0.75f;
         deltaMatrix[3][2] = 0.25f;
 
+        energyKernel.prepareEnergyCalculation( 1024, 1024);
         energyKernel.execute(range);
         energyKernel.get(universe.energyMatrix);
 

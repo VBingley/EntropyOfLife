@@ -3,7 +3,6 @@ package nl.bingley.entropyoflife.timers;
 import nl.bingley.entropyoflife.UniversePanel;
 import nl.bingley.entropyoflife.config.LifeProperties;
 import nl.bingley.entropyoflife.config.UniverseProperties;
-import nl.bingley.entropyoflife.kernels.DeltaEnergyKernel;
 import nl.bingley.entropyoflife.kernels.EnergyKernel;
 import nl.bingley.entropyoflife.models.Universe;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,7 @@ public class UniverseUpdaterTest {
     private float[][] energyMatrix;
     private LifeProperties props;
     private UniverseUpdater universeUpdater;
+    private EnergyKernel energyKernel;
 
     @Test
     public void testGameOfLifeDeath() {
@@ -122,8 +122,7 @@ public class UniverseUpdaterTest {
 
         props = universeProperties.getLifeProperties();
         energyMatrix = universe.energyMatrix;
-        DeltaEnergyKernel deltaEnergyKernel = new DeltaEnergyKernel(universe, universeProperties);
-        EnergyKernel energyKernel = new EnergyKernel(universe, universeProperties);
-        universeUpdater = new UniverseUpdater(universe, mock(UniversePanel.class), universeProperties, deltaEnergyKernel, energyKernel);
+        energyKernel = new EnergyKernel(universe, universeProperties, 0, 1024, 1024);
+        universeUpdater = new UniverseUpdater(universe, mock(UniversePanel.class), universeProperties, energyKernel);
     }
 }

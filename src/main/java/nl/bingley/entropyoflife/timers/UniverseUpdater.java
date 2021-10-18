@@ -4,7 +4,6 @@ import com.aparapi.Range;
 import nl.bingley.entropyoflife.UniversePanel;
 import nl.bingley.entropyoflife.config.LifeProperties;
 import nl.bingley.entropyoflife.config.UniverseProperties;
-import nl.bingley.entropyoflife.kernels.DeltaEnergyKernel;
 import nl.bingley.entropyoflife.kernels.EnergyKernel;
 import nl.bingley.entropyoflife.models.Universe;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,6 @@ public class UniverseUpdater implements ActionListener {
     private final LifeProperties lifeProps;
 
     private final Universe universe;
-    private final DeltaEnergyKernel deltaEnergyKernel;
     private final EnergyKernel energyKernel;
     private final Range kernelRange;
 
@@ -28,15 +26,13 @@ public class UniverseUpdater implements ActionListener {
     private long genPerSecTimer;
     private int genPerSecCounter = 0;
 
-    public UniverseUpdater(Universe universe, UniversePanel universePanel, UniverseProperties universeProperties,
-                           DeltaEnergyKernel deltaEnergyKernel, EnergyKernel energyKernel) {
+    public UniverseUpdater(Universe universe, UniversePanel universePanel, UniverseProperties universeProperties, EnergyKernel energyKernel) {
         this.universe = universe;
         this.panel = universePanel;
         this.uniProps = universeProperties;
         lifeProps = uniProps.getLifeProperties();
 
         kernelRange = Range.create2D(uniProps.getSize(), uniProps.getSize());
-        this.deltaEnergyKernel = deltaEnergyKernel;
         this.energyKernel = energyKernel;
         genPerSecTimer = System.currentTimeMillis();
     }
@@ -52,10 +48,9 @@ public class UniverseUpdater implements ActionListener {
     public void updateUniverse() {
         universe.incrementGeneration();
 
-        deltaEnergyKernel.put(universe.energyMatrix);
-        deltaEnergyKernel.execute(kernelRange);
-        deltaEnergyKernel.get(universe.deltaMatrix);
-        energyKernel.put(universe.deltaMatrix);
+        energyKernel.prepareDeltaCalculation();
+        energyKernel.execute(kernelRange);
+        energyKernel.prepareEnergyCalculation(panel.getWidth(), panel.getHeight());
         energyKernel.execute(kernelRange);
         energyKernel.get(universe.energyMatrix);
     }
