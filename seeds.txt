@@ -1,2 +1,11 @@
-Seed                ruleset     result
-125409729025800     r10bugs     bug moving down
+# bug moving diagonally
+life.ruleset=r10bugs
+life.universe.random-seed=53953127593100
+life.universe.size=64
+life.universe.spawn=32
+
+# bug moving vertically
+life.ruleset=r10bugs
+life.universe.random-seed=54069471498100
+life.universe.size=64
+life.universe.spawn=32

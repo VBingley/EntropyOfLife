@@ -1,7 +1,12 @@
 package nl.bingley.entropyoflife.timers;
 
-import nl.bingley.entropyoflife.services.UniverseStateCalculator;
+import com.aparapi.Range;
 import nl.bingley.entropyoflife.UniversePanel;
+import nl.bingley.entropyoflife.config.LifeProperties;
+import nl.bingley.entropyoflife.config.UniverseProperties;
+import nl.bingley.entropyoflife.kernels.DeltaEnergyKernel;
+import nl.bingley.entropyoflife.kernels.EnergyKernel;
+import nl.bingley.entropyoflife.models.Universe;
 import org.springframework.stereotype.Component;
 
 import java.awt.event.ActionEvent;
@@ -10,16 +15,29 @@ import java.awt.event.ActionListener;
 @Component
 public class UniverseUpdater implements ActionListener {
 
-    private final UniverseStateCalculator universeStateCalculator;
     private final UniversePanel panel;
+    private final UniverseProperties uniProps;
+    private final LifeProperties lifeProps;
+
+    private final Universe universe;
+    private final DeltaEnergyKernel deltaEnergyKernel;
+    private final EnergyKernel energyKernel;
+    private final Range kernelRange;
 
     private boolean isPaused = false;
     private long genPerSecTimer;
     private int genPerSecCounter = 0;
 
-    public UniverseUpdater(UniverseStateCalculator universeStateCalculator, UniversePanel universePanel) {
-        this.universeStateCalculator = universeStateCalculator;
+    public UniverseUpdater(Universe universe, UniversePanel universePanel, UniverseProperties universeProperties,
+                           DeltaEnergyKernel deltaEnergyKernel, EnergyKernel energyKernel) {
+        this.universe = universe;
         this.panel = universePanel;
+        this.uniProps = universeProperties;
+        lifeProps = uniProps.getLifeProperties();
+
+        kernelRange = Range.create2D(uniProps.getSize(), uniProps.getSize());
+        this.deltaEnergyKernel = deltaEnergyKernel;
+        this.energyKernel = energyKernel;
         genPerSecTimer = System.currentTimeMillis();
     }
 
@@ -27,8 +45,19 @@ public class UniverseUpdater implements ActionListener {
     public void actionPerformed(ActionEvent event) {
         if (!isPaused) {
             updateGenPerSecTimer();
-            universeStateCalculator.nextGeneration();
+            updateUniverse();
         }
+    }
+
+    public void updateUniverse() {
+        universe.incrementGeneration();
+
+        deltaEnergyKernel.put(universe.energyMatrix);
+        deltaEnergyKernel.execute(kernelRange);
+        deltaEnergyKernel.get(universe.deltaMatrix);
+        energyKernel.put(universe.deltaMatrix);
+        energyKernel.execute(kernelRange);
+        energyKernel.get(universe.energyMatrix);
     }
 
     private void updateGenPerSecTimer() {
@@ -38,5 +67,9 @@ public class UniverseUpdater implements ActionListener {
             genPerSecCounter = 0;
         }
         genPerSecCounter++;
+    }
+
+    public void reset() {
+        universe.initializeRandom(uniProps.getSpawnSize(), System.nanoTime(), lifeProps.getHighEnergyState(), lifeProps.getLowEnergyState());
     }
 }

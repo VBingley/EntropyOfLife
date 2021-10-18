@@ -3,7 +3,6 @@ package nl.bingley.entropyoflife.listeners;
 import nl.bingley.entropyoflife.UniversePanel;
 import nl.bingley.entropyoflife.config.LifeProperties;
 import nl.bingley.entropyoflife.config.UniverseProperties;
-import nl.bingley.entropyoflife.models.Cell;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -28,7 +27,7 @@ public class MouseInputListener implements MouseListener, MouseMotionListener, M
     @Override
     public void mousePressed(MouseEvent mouseEvent) {
         origin = mouseEvent.getPoint();
-        paintValue = universePanel.findCellAtPixel(origin.x, origin.y).value > props.getLifeEnergyThreshold() ?
+        paintValue = universePanel.findEnergyAtPixel(origin.x, origin.y) > props.getLifeEnergyThreshold() ?
                 props.getLowEnergyState() : props.getHighEnergyState();
         handleMouseButtons(mouseEvent);
     }
@@ -54,8 +53,7 @@ public class MouseInputListener implements MouseListener, MouseMotionListener, M
     }
 
     private void paintCell(Point point) {
-        Cell cell = universePanel.findCellAtPixel(point.x, point.y);
-        cell.value = paintValue;
+        universePanel.setEnergyAtPixel(point.x, point.y, paintValue);
     }
 
     @Override
