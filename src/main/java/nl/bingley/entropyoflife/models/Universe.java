@@ -14,7 +14,6 @@ public class Universe {
         energyMatrix = new float[size][size];
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                deltaMatrix[x][y] = 0;
                 energyMatrix[x][y] = 0;
             }
         }

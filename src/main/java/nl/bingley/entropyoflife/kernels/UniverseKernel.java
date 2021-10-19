@@ -1,14 +1,13 @@
 package nl.bingley.entropyoflife.kernels;
 
 import com.aparapi.Kernel;
-import nl.bingley.entropyoflife.config.LifeProperties;
-import nl.bingley.entropyoflife.config.UniverseProperties;
+import nl.bingley.entropyoflife.config.properties.LifeProperties;
+import nl.bingley.entropyoflife.config.properties.UniverseProperties;
 import nl.bingley.entropyoflife.models.Universe;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EnergyKernel extends Kernel {
+public class UniverseKernel extends Kernel {
 
     private final float[][] deltaMatrix;
     private final float[][] energyMatrix;
@@ -29,12 +28,7 @@ public class EnergyKernel extends Kernel {
     private final float energyJump;
     private final float energyStep;
 
-    private int runCalc;
-    private int imageWidth;
-    private int imageHeight;
-
-    public EnergyKernel(Universe universe, UniverseProperties universeProperties,
-                        @Value("0") int runCalc, @Value("1024") int imageWidth, @Value("1024") int imageHeight) {
+    public UniverseKernel(Universe universe, UniverseProperties universeProperties) {
         super();
         deltaMatrix = universe.deltaMatrix;
         energyMatrix = universe.energyMatrix;
@@ -55,49 +49,36 @@ public class EnergyKernel extends Kernel {
         energyStep = properties.getEnergyStep();
 
         setExplicit(true);
-        this.runCalc = runCalc;
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
     }
 
-    public void prepareDeltaCalculation() {
-        runCalc = 0;
-    }
-
-    public void prepareEnergyCalculation(int imageWidth, int imageHeight) {
-        get(deltaMatrix);
-        runCalc = 1;
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
-    }
-
-    // Calculate the next energy value for value at x,y
     @Override
     public void run() {
-        int x = getGlobalId(0);
-        int y = getGlobalId(1);
-        if (runCalc == 0) {
-            deltaMatrix[x][y] = calculateOwnEnergyDelta(x, y);
-        } else {
-            energyMatrix[x][y] += deltaMatrix[x][y] - gatherEnergyDeltaFromNeighbourhood(x, y);
+        int cellX = getGlobalId(0);
+        int cellY = getGlobalId(1);
+        int pass = getPassId();
+        if (pass % 2 == 0) {
+            int livingNeighbours = countLivingNeighbours(cellX, cellY);
+            deltaMatrix[cellX][cellY] = calculateDelta(energyMatrix[cellX][cellY], livingNeighbours);
+        } else if (pass % 2 == 1) {
+            energyMatrix[cellX][cellY] += deltaMatrix[cellX][cellY] - sumNeighbourhoodDelta(cellX, cellY);
         }
     }
 
-    private float calculateOwnEnergyDelta(int energyX, int energyY) {
+    private int countLivingNeighbours(int cellX, int cellY) {
         int livingNeighbours = 0;
-        for (int x = energyX - lifeNeighbourhoodRadius; x <= energyX + lifeNeighbourhoodRadius; x++) {
-            for (int y = energyY - lifeNeighbourhoodRadius; y <= energyY + lifeNeighbourhoodRadius; y++) {
-                int posX = EnergyUtil.wrapUniverse(x, universeSize);
-                int posY = EnergyUtil.wrapUniverse(y, universeSize);
-                if ((x != energyX || y != energyY) && energyMatrix[posX][posY] > lifeThreshold) {
+        for (int x = cellX - lifeNeighbourhoodRadius; x <= cellX + lifeNeighbourhoodRadius; x++) {
+            for (int y = cellY - lifeNeighbourhoodRadius; y <= cellY + lifeNeighbourhoodRadius; y++) {
+                int posX = wrapUniverse(x, universeSize);
+                int posY = wrapUniverse(y, universeSize);
+                if ((x != cellX || y != cellY) && energyMatrix[posX][posY] > lifeThreshold) {
                     livingNeighbours += 1;
                 }
             }
         }
-        return calculateEnergyDelta(energyMatrix[energyX][energyY], livingNeighbours);
+        return livingNeighbours;
     }
 
-    private float calculateEnergyDelta(float energyValue, int livingNeighbours) {
+    private float calculateDelta(float energyValue, int livingNeighbours) {
         boolean alive = energyValue > lifeThreshold;
         if (alive && (livingNeighbours < surviveMin || livingNeighbours > surviveMax)) {
             // Cell dies, lower energy state
@@ -126,20 +107,26 @@ public class EnergyKernel extends Kernel {
         }
     }
 
-    private float gatherEnergyDeltaFromNeighbourhood(int deltaX, int deltaY) {
+    private float sumNeighbourhoodDelta(int cellX, int cellY) {
         if (energyNeighbourhoodRadius == 0) {
             return 0;
         }
         float neighbourhoodDelta = 0;
-        for (int x = deltaX - energyNeighbourhoodRadius; x <= deltaX + energyNeighbourhoodRadius; x++) {
-            for (int y = deltaY - energyNeighbourhoodRadius; y <= deltaY + energyNeighbourhoodRadius; y++) {
-                int posX = EnergyUtil.wrapUniverse(x, universeSize);
-                int posY = EnergyUtil.wrapUniverse(y, universeSize);
-                if ((x != deltaX || y != deltaY)) {
+        for (int x = cellX - energyNeighbourhoodRadius; x <= cellX + energyNeighbourhoodRadius; x++) {
+            for (int y = cellY - energyNeighbourhoodRadius; y <= cellY + energyNeighbourhoodRadius; y++) {
+                int posX = wrapUniverse(x, universeSize);
+                int posY = wrapUniverse(y, universeSize);
+                if ((x != cellX || y != cellY)) {
                     neighbourhoodDelta += deltaMatrix[posX][posY];
                 }
             }
         }
         return neighbourhoodDelta / (pow(2 * energyNeighbourhoodRadius + 1, 2) - 1);
+    }
+
+    private int wrapUniverse(int coordinate, int universeSize) {
+        int trueCoordinate = coordinate < 0 ? universeSize + coordinate : coordinate;
+        trueCoordinate = coordinate >= universeSize ? coordinate - universeSize : trueCoordinate;
+        return trueCoordinate;
     }
 }

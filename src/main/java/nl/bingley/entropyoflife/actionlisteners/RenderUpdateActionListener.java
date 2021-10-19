@@ -1,4 +1,4 @@
-package nl.bingley.entropyoflife.timers;
+package nl.bingley.entropyoflife.actionlisteners;
 
 import nl.bingley.entropyoflife.UniversePanel;
 import org.springframework.stereotype.Component;
@@ -7,11 +7,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 @Component
-public class Renderer implements ActionListener {
+public class RenderUpdateActionListener implements ActionListener {
 
     private final UniversePanel universePanel;
 
-    public Renderer(UniversePanel universePanel) {
+    public RenderUpdateActionListener(UniversePanel universePanel) {
         this.universePanel = universePanel;
     }
 

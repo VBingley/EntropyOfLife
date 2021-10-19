@@ -1,21 +1,21 @@
-package nl.bingley.entropyoflife.timers;
+package nl.bingley.entropyoflife.actionlisteners;
 
 import nl.bingley.entropyoflife.UniversePanel;
-import nl.bingley.entropyoflife.config.LifeProperties;
-import nl.bingley.entropyoflife.config.UniverseProperties;
-import nl.bingley.entropyoflife.kernels.EnergyKernel;
+import nl.bingley.entropyoflife.config.properties.LifeProperties;
+import nl.bingley.entropyoflife.config.properties.UniverseProperties;
+import nl.bingley.entropyoflife.kernels.UniverseKernel;
 import nl.bingley.entropyoflife.models.Universe;
 import org.junit.jupiter.api.Test;
 
 import static nl.bingley.entropyoflife.UniverseTestUtil.*;
 import static org.mockito.Mockito.mock;
 
-public class UniverseUpdaterTest {
+public class UniverseUpdateActionListenerTest {
 
     private float[][] energyMatrix;
     private LifeProperties props;
-    private UniverseUpdater universeUpdater;
-    private EnergyKernel energyKernel;
+    private UniverseUpdateActionListener universeUpdateActionListener;
+    private UniverseKernel universeKernel;
 
     @Test
     public void testGameOfLifeDeath() {
@@ -23,7 +23,7 @@ public class UniverseUpdaterTest {
 
         energyMatrix[1][1] = props.getHighEnergyState();
 
-        universeUpdater.updateUniverse();
+        universeUpdateActionListener.updateUniverse();
 
         assertEnergyValue(props.getLowEnergyState(), energyMatrix[1][1]);
         assertEnergyValue(0, countTotalEnergy(energyMatrix));
@@ -37,7 +37,7 @@ public class UniverseUpdaterTest {
         energyMatrix[2][2] = props.getHighEnergyState();
         energyMatrix[3][2] = props.getHighEnergyState();
 
-        universeUpdater.updateUniverse();
+        universeUpdateActionListener.updateUniverse();
 
         assertEnergyValue(props.getLowEnergyState(), energyMatrix[1][2]);
         assertEnergyValue(props.getHighEnergyState(), energyMatrix[2][2]);
@@ -57,7 +57,7 @@ public class UniverseUpdaterTest {
         energyMatrix[2][1] = props.getHighEnergyState();
         energyMatrix[1][1] = props.getHighEnergyState();
 
-        universeUpdater.updateUniverse();
+        universeUpdateActionListener.updateUniverse();
 
         assertEnergyValue(props.getHighEnergyState(), energyMatrix[1][2]);
         assertEnergyValue(props.getHighEnergyState(), energyMatrix[2][2]);
@@ -72,7 +72,7 @@ public class UniverseUpdaterTest {
 
         energyMatrix[2][2] = props.getHighEnergyState();
 
-        universeUpdater.updateUniverse();
+        universeUpdateActionListener.updateUniverse();
 
         assertEnergyValue(props.getLowEnergyState(), energyMatrix[2][2]);
         assertEnergyValue(props.getHighEnergyState(), countTotalEnergy(energyMatrix));
@@ -86,7 +86,7 @@ public class UniverseUpdaterTest {
         energyMatrix[3][3] = props.getHighEnergyState();
         energyMatrix[4][3] = props.getHighEnergyState();
 
-        universeUpdater.updateUniverse();
+        universeUpdateActionListener.updateUniverse();
 
         float energyJump = props.getHighEnergyState() - props.getLowEnergyState();
         float distributedEnergyJump = energyJump / 24f;
@@ -108,7 +108,7 @@ public class UniverseUpdaterTest {
         energyMatrix[2][1] = props.getHighEnergyState();
         energyMatrix[1][1] = props.getHighEnergyState();
 
-        universeUpdater.updateUniverse();
+        universeUpdateActionListener.updateUniverse();
 
         assertEnergyValue(props.getHighEnergyState(), energyMatrix[1][2]);
         assertEnergyValue(props.getHighEnergyState(), energyMatrix[2][2]);
@@ -118,11 +118,13 @@ public class UniverseUpdaterTest {
     }
 
     private void initUniverseUpdate(UniverseProperties universeProperties) {
-        Universe universe = new Universe(universeProperties.getSize());
+        int size = universeProperties.getSize();
+        Universe universe = new Universe(size);
 
         props = universeProperties.getLifeProperties();
         energyMatrix = universe.energyMatrix;
-        energyKernel = new EnergyKernel(universe, universeProperties, 0, 1024, 1024);
-        universeUpdater = new UniverseUpdater(universe, mock(UniversePanel.class), universeProperties, energyKernel);
+        universeKernel = new UniverseKernel(universe, universeProperties);
+
+        universeUpdateActionListener = new UniverseUpdateActionListener(universe, mock(UniversePanel.class), universeProperties, universeKernel);
     }
 }

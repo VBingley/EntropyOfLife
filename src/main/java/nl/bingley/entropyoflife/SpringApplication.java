@@ -1,7 +1,7 @@
 package nl.bingley.entropyoflife;
 
-import nl.bingley.entropyoflife.listeners.MouseInputListener;
-import nl.bingley.entropyoflife.listeners.KeyInputListener;
+import nl.bingley.entropyoflife.inputlisteners.MouseInputListener;
+import nl.bingley.entropyoflife.inputlisteners.KeyInputListener;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;

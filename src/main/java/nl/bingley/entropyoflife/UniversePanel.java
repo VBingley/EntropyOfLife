@@ -1,12 +1,14 @@
 package nl.bingley.entropyoflife;
 
-import nl.bingley.entropyoflife.config.LifeProperties;
-import nl.bingley.entropyoflife.config.UniverseProperties;
+import nl.bingley.entropyoflife.config.properties.LifeProperties;
+import nl.bingley.entropyoflife.config.properties.UniverseProperties;
 import nl.bingley.entropyoflife.models.Universe;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 
 @Component
 public class UniversePanel extends JPanel {
@@ -14,6 +16,8 @@ public class UniversePanel extends JPanel {
 
     private final Universe universe;
     private final LifeProperties props;
+
+    private final BufferedImage bufferedImage;
 
     private int translateX;
     private int translateY;
@@ -27,18 +31,18 @@ public class UniversePanel extends JPanel {
         props = universeProperties.getLifeProperties();
         translateX = 1024 / 2 - universe.getSize() * cellSize / 2;
         translateY = 1024 / 2 - universe.getSize() * cellSize / 2;
+        bufferedImage = new BufferedImage(1024, 1024, BufferedImage.TYPE_INT_RGB);
     }
 
     @Override
     protected void paintComponent(Graphics graphics) {
         paintBackground(graphics);
-
-         float[][] energyMatrix = universe.energyMatrix;
-         paintCells(graphics, energyMatrix);
-         paintInfo(graphics);
+        paintCells(graphics);
+        paintInfo(graphics);
 
         graphics.dispose();
     }
+
 
     private void paintBackground(Graphics graphics) {
         graphics.setColor(Color.BLACK);
@@ -46,47 +50,32 @@ public class UniversePanel extends JPanel {
         graphics.fillRect(0, 0, bounds.width, bounds.height);
     }
 
-    private void paintInfo(Graphics graphics) {
-        graphics.setColor(Color.RED);
-        graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
-        graphics.drawString("Gen/s:  " + genPerSec, 10, 40);
-    }
-
-    private void paintCells(Graphics graphics, float[][] cells) {
-        Rectangle bounds = graphics.getClipBounds();
-
-        int drawSize = cellSize > 3 ? cellSize - 1 : cellSize;
-        for (int x = 0; x < cells.length; x++) {
-            for (int y = 0; y < cells.length; y++) {
-                int posX = x * cellSize + translateX;
-                int posY = y * cellSize + translateY;
-                if (posX > -cellSize && posX < bounds.width && posY > -cellSize && posY < bounds.height) {
-                    paintCell(graphics, posX, posY, drawSize, calculateCellColor(cells[x][y]));
-                }
-            }
+    private void paintCells(Graphics graphics) {
+        int[] imageData = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
+        for (int i = 0; i < imageData.length; i++) {
+            renderCell(i, bufferedImage.getWidth(), imageData);
         }
+        graphics.drawImage(bufferedImage, 0, 0, 1024, 1024, this);
     }
 
-    private void paintCell(Graphics graphics, int posX, int posY, int size, Color fill) {
-        graphics.setColor(fill);
-        graphics.fillRect(posX, posY, size, size);
-    }
-
-    public Color calculateCellColor(float cellValue) {
-        if (cellValue > 1) {
-            return new Color(0.75f, 0, 0);
+    private void renderCell(int pixel, int imageWidth, int[] imageData) {
+        int pixelX = pixel % imageWidth - translateX;
+        int pixelY = pixel / imageWidth - translateY;
+        if (cellSize > 3 && (pixelX % cellSize == 0 || pixelY % cellSize == 0)) {
+            imageData[pixel] = 0;
+            return;
         }
-        if (cellValue > props.getMinEnergyState()) {
-            float red = cellValue > props.getLifeEnergyThreshold() ?
-                    0.5f * gradient(cellValue, 1 - props.getLifeEnergyThreshold(), 1) : 0;
-            float green = cellValue > props.getLifeEnergyThreshold() ?
-                    0.5f * gradient(cellValue, props.getHighEnergyState() - props.getLowEnergyState(), props.getHighEnergyState()) : 0;
-            float blue = 0.5f * gradient(cellValue, props.getLifeEnergyThreshold() - props.getMinEnergyState(), props.getLifeEnergyThreshold());
-            return new Color(red, green, blue);
+        int cellX = pixelX / cellSize;
+        int cellY = pixelY / cellSize;
+        if (cellX < 0 || cellX >= universe.getSize() || cellY < 0 || cellY >= universe.getSize()) {
+            imageData[pixel] = 0;
         } else {
-            float abs = Math.abs(cellValue);
-            float value = abs > 1 ? 1 : abs;
-            return new Color(value * 0.5f, 0, value * 0.5f);
+            float cellValue = universe.energyMatrix[cellX][cellY];
+            if (cellValue < props.getLifeEnergyThreshold()) {
+                imageData[pixel] = 0x000055;
+            } else {
+                imageData[pixel] = 0x336633;
+            }
         }
     }
 
@@ -100,13 +89,19 @@ public class UniversePanel extends JPanel {
         return result < 0 ? 0 : result;
     }
 
-    public float findEnergyAtPixel(int pixelX, int pixelY) {
+    private void paintInfo(Graphics graphics) {
+        graphics.setColor(Color.RED);
+        graphics.drawString("Gen:  " + universe.getGeneration(), 10, 20);
+        graphics.drawString("Gen/s:  " + genPerSec, 10, 40);
+    }
+
+    public float findValueAtPixel(int pixelX, int pixelY) {
         int x = convertPixelToCellCoordinate(pixelX, true);
         int y = convertPixelToCellCoordinate(pixelY, false);
         return universe.energyMatrix[x][y];
     }
 
-    public void setEnergyAtPixel(int pixelX, int pixelY, float value) {
+    public void setValueAtPixel(int pixelX, int pixelY, float value) {
         int x = convertPixelToCellCoordinate(pixelX, true);
         int y = convertPixelToCellCoordinate(pixelY, false);
         universe.energyMatrix[x][y] = value;
@@ -117,7 +112,7 @@ public class UniversePanel extends JPanel {
         int universeSize = universe.getSize();
         int cell = (pixel - translate) / cellSize;
         if (cell < 0) cell = 0;
-        if (cell >= universeSize) cell = universeSize -1;
+        if (cell >= universeSize) cell = universeSize - 1;
         return cell;
     }
 

@@ -1,7 +1,7 @@
 package nl.bingley.entropyoflife;
 
-import nl.bingley.entropyoflife.config.LifeProperties;
-import nl.bingley.entropyoflife.config.UniverseProperties;
+import nl.bingley.entropyoflife.config.properties.LifeProperties;
+import nl.bingley.entropyoflife.config.properties.UniverseProperties;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;

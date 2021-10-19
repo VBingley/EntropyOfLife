@@ -1,10 +1,10 @@
-package nl.bingley.entropyoflife.timers;
+package nl.bingley.entropyoflife.actionlisteners;
 
 import com.aparapi.Range;
 import nl.bingley.entropyoflife.UniversePanel;
-import nl.bingley.entropyoflife.config.LifeProperties;
-import nl.bingley.entropyoflife.config.UniverseProperties;
-import nl.bingley.entropyoflife.kernels.EnergyKernel;
+import nl.bingley.entropyoflife.config.properties.LifeProperties;
+import nl.bingley.entropyoflife.config.properties.UniverseProperties;
+import nl.bingley.entropyoflife.kernels.UniverseKernel;
 import nl.bingley.entropyoflife.models.Universe;
 import org.springframework.stereotype.Component;
 
@@ -12,28 +12,28 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 @Component
-public class UniverseUpdater implements ActionListener {
+public class UniverseUpdateActionListener implements ActionListener {
 
     private final UniversePanel panel;
     private final UniverseProperties uniProps;
     private final LifeProperties lifeProps;
 
     private final Universe universe;
-    private final EnergyKernel energyKernel;
+    private final UniverseKernel universeKernel;
     private final Range kernelRange;
 
     private boolean isPaused = false;
     private long genPerSecTimer;
     private int genPerSecCounter = 0;
 
-    public UniverseUpdater(Universe universe, UniversePanel universePanel, UniverseProperties universeProperties, EnergyKernel energyKernel) {
+    public UniverseUpdateActionListener(Universe universe, UniversePanel universePanel, UniverseProperties universeProperties, UniverseKernel universeKernel) {
         this.universe = universe;
         this.panel = universePanel;
         this.uniProps = universeProperties;
         lifeProps = uniProps.getLifeProperties();
 
         kernelRange = Range.create2D(uniProps.getSize(), uniProps.getSize());
-        this.energyKernel = energyKernel;
+        this.universeKernel = universeKernel;
         genPerSecTimer = System.currentTimeMillis();
     }
 
@@ -48,11 +48,9 @@ public class UniverseUpdater implements ActionListener {
     public void updateUniverse() {
         universe.incrementGeneration();
 
-        energyKernel.prepareDeltaCalculation();
-        energyKernel.execute(kernelRange);
-        energyKernel.prepareEnergyCalculation(panel.getWidth(), panel.getHeight());
-        energyKernel.execute(kernelRange);
-        energyKernel.get(universe.energyMatrix);
+        universeKernel.put(universe.energyMatrix);
+        universeKernel.execute(kernelRange, 2);
+        universeKernel.get(universe.energyMatrix);
     }
 
     private void updateGenPerSecTimer() {

@@ -1,6 +1,6 @@
-package nl.bingley.entropyoflife.listeners;
+package nl.bingley.entropyoflife.inputlisteners;
 
-import nl.bingley.entropyoflife.timers.UniverseUpdater;
+import nl.bingley.entropyoflife.actionlisteners.UniverseUpdateActionListener;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -11,11 +11,11 @@ import java.awt.event.KeyListener;
 public class KeyInputListener implements KeyListener {
 
     private final Timer universeUpdateTimer;
-    private final UniverseUpdater universeUpdater;
+    private final UniverseUpdateActionListener universeUpdateActionListener;
 
-    public KeyInputListener(Timer universeUpdateTimer, UniverseUpdater universeUpdater) {
+    public KeyInputListener(Timer universeUpdateTimer, UniverseUpdateActionListener universeUpdateActionListener) {
         this.universeUpdateTimer = universeUpdateTimer;
-        this.universeUpdater = universeUpdater;
+        this.universeUpdateActionListener = universeUpdateActionListener;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class KeyInputListener implements KeyListener {
             case KeyEvent.VK_ENTER:
             case KeyEvent.VK_R:
             case KeyEvent.VK_BACK_SPACE:
-                universeUpdater.reset();
+                universeUpdateActionListener.reset();
                 break;
             case KeyEvent.VK_UP:
                 changeGenerationsPerSecond(0.5f);
@@ -37,7 +37,7 @@ public class KeyInputListener implements KeyListener {
                 break;
             case KeyEvent.VK_RIGHT:
                 if (!universeUpdateTimer.isRunning()) {
-                    universeUpdater.updateUniverse();
+                    universeUpdateActionListener.updateUniverse();
                 }
                 break;
         }

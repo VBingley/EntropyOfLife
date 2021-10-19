@@ -9,3 +9,9 @@ life.ruleset=r10bugs
 life.universe.random-seed=54069471498100
 life.universe.size=64
 life.universe.spawn=32
+
+# Two oscillators
+life.ruleset=entropy-r10bugs
+life.universe.random-seed=3283919353490400
+life.universe.size=128
+life.universe.spawn=32

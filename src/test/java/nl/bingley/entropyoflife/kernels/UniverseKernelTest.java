@@ -1,8 +1,8 @@
 package nl.bingley.entropyoflife.kernels;
 
 import com.aparapi.Range;
-import nl.bingley.entropyoflife.config.LifeProperties;
-import nl.bingley.entropyoflife.config.UniverseProperties;
+import nl.bingley.entropyoflife.config.properties.LifeProperties;
+import nl.bingley.entropyoflife.config.properties.UniverseProperties;
 import nl.bingley.entropyoflife.models.Universe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test;
 import static nl.bingley.entropyoflife.UniverseTestUtil.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class EnergyKernelTest {
+public class UniverseKernelTest {
 
     private Universe universe;
 
     private Range range;
-    private EnergyKernel energyKernel;
+    private UniverseKernel universeKernel;
     private LifeProperties lifeProperties;
 
     @BeforeEach
@@ -24,18 +24,18 @@ public class EnergyKernelTest {
         lifeProperties = universeProperties.getLifeProperties();
         universe = new Universe(universeProperties.getSize());
         range = Range.create2D(universeProperties.getSize(), universeProperties.getSize());
-        energyKernel = new EnergyKernel(universe, universeProperties, 0, 1024, 1024);
+        universeKernel = new UniverseKernel(universe, universeProperties);
     }
 
     @Test
-    public void testBasicDeltaTransformation() {
+    public void testFirstPass() {
         float[][] energyMatrix = universe.energyMatrix;
         energyMatrix[1][2] = lifeProperties.getHighEnergyState();
         energyMatrix[2][2] = lifeProperties.getHighEnergyState();
         energyMatrix[3][2] = lifeProperties.getHighEnergyState();
 
-        energyKernel.execute(range);
-        energyKernel.get(universe.deltaMatrix);
+        universeKernel.execute(range, 1);
+        universeKernel.get(universe.deltaMatrix);
 
         float[][] deltaMatrix = universe.deltaMatrix;
         assertEnergyValue(-lifeProperties.getEnergyJump(), deltaMatrix[1][2]);
@@ -47,20 +47,20 @@ public class EnergyKernelTest {
     }
 
     @Test
-    public void testBasicTransformation() {
-        float[][] deltaMatrix = universe.deltaMatrix;
-        deltaMatrix[1][2] = 1;
-        deltaMatrix[2][2] = 0.75f;
-        deltaMatrix[3][2] = 0.25f;
-
-        energyKernel.prepareEnergyCalculation( 1024, 1024);
-        energyKernel.execute(range);
-        energyKernel.get(universe.energyMatrix);
-
+    public void testBothPasses() {
         float[][] energyMatrix = universe.energyMatrix;
-        assertEnergyValue(1, energyMatrix[1][2]);
-        assertEnergyValue(0.75f, energyMatrix[2][2]);
-        assertEnergyValue(0.25f, energyMatrix[3][2]);
-        assertEquals(2f, countTotalEnergy(energyMatrix));
+        energyMatrix[1][2] = lifeProperties.getHighEnergyState();
+        energyMatrix[2][2] = lifeProperties.getHighEnergyState();
+        energyMatrix[3][2] = lifeProperties.getHighEnergyState();
+
+        universeKernel.execute(range, 2);
+        universeKernel.get(universe.energyMatrix);
+
+        assertEnergyValue(0, energyMatrix[1][2]);
+        assertEnergyValue(1, energyMatrix[2][2]);
+        assertEnergyValue(0, energyMatrix[3][2]);
+        assertEnergyValue(1, energyMatrix[2][1]);
+        assertEnergyValue(1, energyMatrix[2][3]);
+        assertEquals(3, countTotalEnergy(energyMatrix));
     }
 }

@@ -1,4 +1,4 @@
-package nl.bingley.entropyoflife.config;
+package nl.bingley.entropyoflife.config.properties;
 
 import org.springframework.core.env.Environment;
 

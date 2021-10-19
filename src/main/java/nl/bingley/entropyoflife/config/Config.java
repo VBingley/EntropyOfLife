@@ -1,8 +1,10 @@
 package nl.bingley.entropyoflife.config;
 
+import nl.bingley.entropyoflife.config.properties.LifeProperties;
+import nl.bingley.entropyoflife.config.properties.UniverseProperties;
 import nl.bingley.entropyoflife.models.Universe;
-import nl.bingley.entropyoflife.timers.Renderer;
-import nl.bingley.entropyoflife.timers.UniverseUpdater;
+import nl.bingley.entropyoflife.actionlisteners.RenderUpdateActionListener;
+import nl.bingley.entropyoflife.actionlisteners.UniverseUpdateActionListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -26,14 +28,14 @@ public class Config {
     }
 
     @Bean
-    public Timer rendererTimer(Renderer renderer) {
-        Timer timer = new Timer(20, renderer);
+    public Timer rendererTimer(RenderUpdateActionListener renderUpdateActionListener) {
+        Timer timer = new Timer(20, renderUpdateActionListener);
         timer.start();
         return timer;
     }
 
     @Bean
-    public Timer universeUpdateTimer(UniverseUpdater updater) {
+    public Timer universeUpdateTimer(UniverseUpdateActionListener updater) {
         Timer timer = new Timer(125, updater);
         timer.start();
         return timer;

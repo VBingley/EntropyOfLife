@@ -1,8 +1,8 @@
-package nl.bingley.entropyoflife.listeners;
+package nl.bingley.entropyoflife.inputlisteners;
 
 import nl.bingley.entropyoflife.UniversePanel;
-import nl.bingley.entropyoflife.config.LifeProperties;
-import nl.bingley.entropyoflife.config.UniverseProperties;
+import nl.bingley.entropyoflife.config.properties.LifeProperties;
+import nl.bingley.entropyoflife.config.properties.UniverseProperties;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -27,7 +27,7 @@ public class MouseInputListener implements MouseListener, MouseMotionListener, M
     @Override
     public void mousePressed(MouseEvent mouseEvent) {
         origin = mouseEvent.getPoint();
-        paintValue = universePanel.findEnergyAtPixel(origin.x, origin.y) > props.getLifeEnergyThreshold() ?
+        paintValue = universePanel.findValueAtPixel(origin.x, origin.y) > props.getLifeEnergyThreshold() ?
                 props.getLowEnergyState() : props.getHighEnergyState();
         handleMouseButtons(mouseEvent);
     }
@@ -53,7 +53,7 @@ public class MouseInputListener implements MouseListener, MouseMotionListener, M
     }
 
     private void paintCell(Point point) {
-        universePanel.setEnergyAtPixel(point.x, point.y, paintValue);
+        universePanel.setValueAtPixel(point.x, point.y, paintValue);
     }
 
     @Override
