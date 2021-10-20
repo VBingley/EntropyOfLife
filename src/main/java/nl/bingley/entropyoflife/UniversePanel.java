@@ -17,7 +17,7 @@ public class UniversePanel extends JPanel {
     private final Universe universe;
     private final LifeProperties props;
 
-    private final BufferedImage bufferedImage;
+    private BufferedImage bufferedImage;
 
     private int translateX;
     private int translateY;
@@ -51,11 +51,14 @@ public class UniversePanel extends JPanel {
     }
 
     private void paintCells(Graphics graphics) {
+        if (bufferedImage.getWidth() != getWidth() || bufferedImage.getHeight() != getHeight()) {
+            bufferedImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+        }
         int[] imageData = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
         for (int i = 0; i < imageData.length; i++) {
             renderCell(i, bufferedImage.getWidth(), imageData);
         }
-        graphics.drawImage(bufferedImage, 0, 0, 1024, 1024, this);
+        graphics.drawImage(bufferedImage, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), this);
     }
 
     private void renderCell(int pixel, int imageWidth, int[] imageData) {
@@ -70,23 +73,27 @@ public class UniversePanel extends JPanel {
         if (cellX < 0 || cellX >= universe.getSize() || cellY < 0 || cellY >= universe.getSize()) {
             imageData[pixel] = 0;
         } else {
+            float range = props.getEnergyJump();
             float cellValue = universe.energyMatrix[cellX][cellY];
-            if (cellValue < props.getLifeEnergyThreshold()) {
-                imageData[pixel] = 0x000055;
+            if (cellValue < 0) {
+                int color = colorGradient(Math.min(range, Math.abs(cellValue)) / range, 120);
+                imageData[pixel] = color + (color << 16);
+            } else if (cellValue < props.getLifeEnergyThreshold()) {
+                imageData[pixel] = colorGradient(cellValue / props.getLifeEnergyThreshold(), 122);
+            } else if (cellValue < props.getHighEnergyState()) {
+                imageData[pixel] = (71 << 16) + (97 << 8) + 60;
             } else {
-                imageData[pixel] = 0x336633;
+                float modifier = Math.min(range, cellValue - props.getLifeEnergyThreshold());
+                int red = colorGradient(modifier / range, 130);
+                int green = colorGradient(1 - (modifier / range), 130);
+                imageData[pixel] = (int) ((red << 16) + (green << 8) + ((1 - modifier / range)));
             }
         }
     }
 
-    private float gradient(float value, float radius, float peak) {
-        // min = 0 mid = pi/2 max = pi
-        if (value < 0 || value < peak - radius || value > peak + radius) {
-            return 0;
-        }
-        float location = value - peak + radius;
-        float result = (float) Math.sin((location / (radius * 2)) * Math.PI);
-        return result < 0 ? 0 : result;
+    private int colorGradient(float num, int max) {
+        int result = (int) (Math.sin(num * 0.5 * Math.PI) * max);
+        return Math.max(result, 0);
     }
 
     private void paintInfo(Graphics graphics) {
