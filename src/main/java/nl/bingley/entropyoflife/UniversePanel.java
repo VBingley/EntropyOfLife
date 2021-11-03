@@ -18,10 +18,13 @@ public class UniversePanel extends JPanel {
     private final LifeProperties props;
 
     private BufferedImage bufferedImage;
+    private int lastPixelValue = 0;
+    private int lastCellX = -1;
+    private int lastCellY = -1;
 
     private int translateX;
     private int translateY;
-    private int cellSize = 8;
+    private int cellSize = 16;
 
     private int genPerSec = 0;
 
@@ -54,14 +57,16 @@ public class UniversePanel extends JPanel {
         if (bufferedImage.getWidth() != getWidth() || bufferedImage.getHeight() != getHeight()) {
             bufferedImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         }
+        // I'd really like to do this in a GPU kernel,
+        // but for some reason I can't get that to work for larger images without getting an FP64 error
         int[] imageData = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
         for (int i = 0; i < imageData.length; i++) {
-            renderCell(i, bufferedImage.getWidth(), imageData);
+            setImagePixelValue(i, bufferedImage.getWidth(), imageData);
         }
         graphics.drawImage(bufferedImage, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), this);
     }
 
-    private void renderCell(int pixel, int imageWidth, int[] imageData) {
+    private void setImagePixelValue(int pixel, int imageWidth, int[] imageData) {
         int pixelX = pixel % imageWidth - translateX;
         int pixelY = pixel / imageWidth - translateY;
         if (cellSize > 3 && (pixelX % cellSize == 0 || pixelY % cellSize == 0)) {
@@ -70,6 +75,10 @@ public class UniversePanel extends JPanel {
         }
         int cellX = pixelX / cellSize;
         int cellY = pixelY / cellSize;
+        if (cellX == lastCellX && cellY == lastCellY) {
+            imageData[pixel] = lastPixelValue;
+            return;
+        }
         if (cellX < 0 || cellX >= universe.getSize() || cellY < 0 || cellY >= universe.getSize()) {
             imageData[pixel] = 0;
         } else {
@@ -89,6 +98,9 @@ public class UniversePanel extends JPanel {
                 imageData[pixel] = (int) ((red << 16) + (green << 8) + ((1 - modifier / range)));
             }
         }
+        lastCellX = cellX;
+        lastCellY = cellY;
+        lastPixelValue = imageData[pixel];
     }
 
     private int colorGradient(float num, int max) {
