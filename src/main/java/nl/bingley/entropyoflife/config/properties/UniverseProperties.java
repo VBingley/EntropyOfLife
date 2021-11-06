@@ -15,10 +15,12 @@ public class UniverseProperties {
     private int spawnSize;
     @Value("${life.universe.random-seed:0}")
     private long randomSeed;
+    private final String ruleset;
 
     private final LifeProperties lifeProperties;
 
     public UniverseProperties(Environment env, @Value("${life.ruleset}") String ruleset) {
+        this.ruleset = ruleset;
         lifeProperties = new LifeProperties(env, ruleset);
     }
 
@@ -32,6 +34,10 @@ public class UniverseProperties {
 
     public long getRandomSeed() {
         return randomSeed;
+    }
+
+    public String getRuleset() {
+        return ruleset;
     }
 
     public boolean isRandomized() {

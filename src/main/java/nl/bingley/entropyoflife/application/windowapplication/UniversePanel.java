@@ -2,6 +2,7 @@ package nl.bingley.entropyoflife.application.windowapplication;
 
 import nl.bingley.entropyoflife.config.properties.LifeProperties;
 import nl.bingley.entropyoflife.config.properties.UniverseProperties;
+import nl.bingley.entropyoflife.kernels.UniverseImageRenderer;
 import nl.bingley.entropyoflife.models.Universe;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +18,8 @@ public class UniversePanel extends JPanel {
     private final Universe universe;
     private final LifeProperties props;
 
+    private final UniverseImageRenderer imageRenderer;
     private BufferedImage bufferedImage;
-    private int lastPixelValue = 0;
-    private int lastCellX = -1;
-    private int lastCellY = -1;
 
     private int translateX;
     private int translateY;
@@ -28,12 +27,14 @@ public class UniversePanel extends JPanel {
 
     private int genPerSec = 0;
 
-    public UniversePanel(Universe universe, UniverseProperties universeProperties) {
+    public UniversePanel(Universe universe, UniverseProperties universeProperties, UniverseImageRenderer imageRenderer) {
         super();
         this.universe = universe;
         props = universeProperties.getLifeProperties();
         translateX = 1024 / 2 - universe.getSize() * cellSize / 2;
         translateY = 1024 / 2 - universe.getSize() * cellSize / 2;
+
+        this.imageRenderer = imageRenderer;
         bufferedImage = new BufferedImage(1024, 1024, BufferedImage.TYPE_INT_RGB);
     }
 
@@ -57,55 +58,11 @@ public class UniversePanel extends JPanel {
         if (bufferedImage.getWidth() != getWidth() || bufferedImage.getHeight() != getHeight()) {
             bufferedImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         }
-        // I'd really like to do this in a GPU kernel,
-        // but for some reason I can't get that to work for larger images without getting an FP64 error
+
         int[] imageData = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
-        for (int i = 0; i < imageData.length; i++) {
-            setImagePixelValue(i, bufferedImage.getWidth(), imageData);
-        }
+        imageRenderer.render(imageData, getWidth(), cellSize, translateX, translateY);
+
         graphics.drawImage(bufferedImage, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), this);
-    }
-
-    private void setImagePixelValue(int pixel, int imageWidth, int[] imageData) {
-        int pixelX = pixel % imageWidth - translateX;
-        int pixelY = pixel / imageWidth - translateY;
-        if (cellSize > 3 && (pixelX % cellSize == 0 || pixelY % cellSize == 0)) {
-            imageData[pixel] = 0;
-            return;
-        }
-        int cellX = pixelX / cellSize;
-        int cellY = pixelY / cellSize;
-        if (cellX == lastCellX && cellY == lastCellY) {
-            imageData[pixel] = lastPixelValue;
-            return;
-        }
-        if (cellX < 0 || cellX >= universe.getSize() || cellY < 0 || cellY >= universe.getSize()) {
-            imageData[pixel] = 0;
-        } else {
-            float range = props.getEnergyJump();
-            float cellValue = universe.energyMatrix[cellX][cellY];
-            if (cellValue < 0) {
-                int color = colorGradient(Math.min(range, Math.abs(cellValue)) / range, 120);
-                imageData[pixel] = color + (color << 16);
-            } else if (cellValue < props.getLifeEnergyThreshold()) {
-                imageData[pixel] = colorGradient(cellValue / props.getLifeEnergyThreshold(), 122);
-            } else if (cellValue < props.getHighEnergyState()) {
-                imageData[pixel] = (71 << 16) + (97 << 8) + 60;
-            } else {
-                float modifier = Math.min(range, cellValue - props.getLifeEnergyThreshold());
-                int red = colorGradient(modifier / range, 130);
-                int green = colorGradient(1 - (modifier / range), 130);
-                imageData[pixel] = (int) ((red << 16) + (green << 8) + ((1 - modifier / range)));
-            }
-        }
-        lastCellX = cellX;
-        lastCellY = cellY;
-        lastPixelValue = imageData[pixel];
-    }
-
-    private int colorGradient(float num, int max) {
-        int result = (int) (Math.sin(num * 0.5 * Math.PI) * max);
-        return Math.max(result, 0);
     }
 
     private void paintInfo(Graphics graphics) {

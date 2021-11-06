@@ -11,5 +11,5 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan({
         "nl.bingley.entropyoflife.application.gifrendererapplication"})
 @Configuration
-public class GifRendererConfig {
+public class GifGeneratorConfig {
 }
