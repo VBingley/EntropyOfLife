@@ -22,7 +22,6 @@ public class UniverseUpdateActionListener implements ActionListener {
     private final UniverseKernel universeKernel;
     private final Range kernelRange;
 
-    private boolean isPaused = false;
     private long genPerSecTimer;
     private int genPerSecCounter = 0;
 
@@ -39,10 +38,8 @@ public class UniverseUpdateActionListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (!isPaused) {
-            updateGenPerSecTimer();
-            updateUniverse();
-        }
+        updateGenPerSecTimer();
+        updateUniverse();
     }
 
     public void updateUniverse() {
