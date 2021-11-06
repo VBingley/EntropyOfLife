@@ -41,7 +41,10 @@ public class SpringApplication {
         universePanel.addMouseWheelListener(mouseInputListener);
         frame.getContentPane().add(universePanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1024, 1024);
+
+        frame.pack();
+        Insets insets = frame.getInsets();
+        frame.setSize(1024 + insets.left + insets.right, 1024 + insets.top + insets.bottom);
         frame.setVisible(true);
     }
 }
