@@ -71,6 +71,6 @@ public class GifGeneratorAppRunner implements Runner {
         universeKernel.execute(kernelRange, 2);
         universeKernel.get(universe.energyMatrix);
 
-        imageRenderer.render(imageData, gifProperties.getCellSize() * uniProperties.getSize(), 8, 0, 0);
+        imageRenderer.render(imageData, gifProperties.getCellSize() * uniProperties.getSize(), gifProperties.getCellSize(), 0, 0);
     }
 }
