@@ -1,17 +1,10 @@
-package nl.bingley.entropyoflife;
+package nl.bingley.entropyoflife.application;
 
-import nl.bingley.entropyoflife.application.Runner;
-import nl.bingley.entropyoflife.application.windowapplication.UniversePanel;
-import nl.bingley.entropyoflife.config.WindowAppConfig;
-import nl.bingley.entropyoflife.inputlisteners.KeyInputListener;
-import nl.bingley.entropyoflife.inputlisteners.MouseInputListener;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 
 import javax.annotation.PostConstruct;
-import javax.swing.*;
-import java.awt.*;
 
 @ComponentScan("nl.bingley.entropyoflife.config")
 @SpringBootApplication

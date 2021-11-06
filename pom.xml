@@ -58,7 +58,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>nl.bingley.entropyoflife.SpringApplication</mainClass>
+                    <mainClass>nl.bingley.entropyoflife.application.SpringApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
