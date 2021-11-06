@@ -1,6 +1,6 @@
 package nl.bingley.entropyoflife.inputlisteners;
 
-import nl.bingley.entropyoflife.UniversePanel;
+import nl.bingley.entropyoflife.application.windowapplication.UniversePanel;
 import nl.bingley.entropyoflife.config.properties.LifeProperties;
 import nl.bingley.entropyoflife.config.properties.UniverseProperties;
 import org.springframework.stereotype.Component;

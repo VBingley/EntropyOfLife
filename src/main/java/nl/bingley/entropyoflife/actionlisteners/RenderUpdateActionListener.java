@@ -1,6 +1,6 @@
 package nl.bingley.entropyoflife.actionlisteners;
 
-import nl.bingley.entropyoflife.UniversePanel;
+import nl.bingley.entropyoflife.application.windowapplication.UniversePanel;
 import org.springframework.stereotype.Component;
 
 import java.awt.event.ActionEvent;

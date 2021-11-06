@@ -1,7 +1,7 @@
 package nl.bingley.entropyoflife.actionlisteners;
 
 import com.aparapi.Range;
-import nl.bingley.entropyoflife.UniversePanel;
+import nl.bingley.entropyoflife.application.windowapplication.UniversePanel;
 import nl.bingley.entropyoflife.config.properties.LifeProperties;
 import nl.bingley.entropyoflife.config.properties.UniverseProperties;
 import nl.bingley.entropyoflife.kernels.UniverseKernel;

@@ -3,17 +3,15 @@ package nl.bingley.entropyoflife.config;
 import nl.bingley.entropyoflife.config.properties.LifeProperties;
 import nl.bingley.entropyoflife.config.properties.UniverseProperties;
 import nl.bingley.entropyoflife.models.Universe;
-import nl.bingley.entropyoflife.actionlisteners.RenderUpdateActionListener;
-import nl.bingley.entropyoflife.actionlisteners.UniverseUpdateActionListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import javax.swing.*;
-
-@ComponentScan("nl.bingley.entropyoflife")
+@ComponentScan({
+        "nl.bingley.entropyoflife.config.properties",
+        "nl.bingley.entropyoflife.kernels"})
 @Configuration
-public class Config {
+public class UniverseConfig {
 
     @Bean
     public Universe universe(UniverseProperties universeProperties) {
@@ -25,19 +23,5 @@ public class Config {
         } else {
             return new Universe(universeProperties.getSize());
         }
-    }
-
-    @Bean
-    public Timer rendererTimer(RenderUpdateActionListener renderUpdateActionListener) {
-        Timer timer = new Timer(20, renderUpdateActionListener);
-        timer.start();
-        return timer;
-    }
-
-    @Bean
-    public Timer universeUpdateTimer(UniverseUpdateActionListener updater) {
-        Timer timer = new Timer(125, updater);
-        timer.start();
-        return timer;
     }
 }

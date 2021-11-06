@@ -1,7 +1,10 @@
 package nl.bingley.entropyoflife;
 
-import nl.bingley.entropyoflife.inputlisteners.MouseInputListener;
+import nl.bingley.entropyoflife.application.Runner;
+import nl.bingley.entropyoflife.application.windowapplication.UniversePanel;
+import nl.bingley.entropyoflife.config.WindowAppConfig;
 import nl.bingley.entropyoflife.inputlisteners.KeyInputListener;
+import nl.bingley.entropyoflife.inputlisteners.MouseInputListener;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
@@ -14,37 +17,18 @@ import java.awt.*;
 @SpringBootApplication
 public class SpringApplication {
 
-    private final UniversePanel universePanel;
-    private final KeyInputListener keyInputListener;
-    private final MouseInputListener mouseInputListener;
+    private final Runner runner;
 
-    public SpringApplication(UniversePanel universePanel, KeyInputListener keyInputListener, MouseInputListener mouseInputListener) {
-        this.universePanel = universePanel;
-        this.keyInputListener = keyInputListener;
-        this.mouseInputListener = mouseInputListener;
+    public SpringApplication(Runner runner) {
+        this.runner = runner;
     }
 
     public static void main(String[] args) {
-
         new SpringApplicationBuilder(SpringApplication.class).headless(false).run(args);
     }
 
     @PostConstruct
     public void run() {
-        JFrame frame = new JFrame();
-        Font font = new Font(Font.MONOSPACED, Font.BOLD, 20);
-        universePanel.setFont(font);
-        universePanel.setFocusable(true);
-        universePanel.addKeyListener(keyInputListener);
-        universePanel.addMouseListener(mouseInputListener);
-        universePanel.addMouseMotionListener(mouseInputListener);
-        universePanel.addMouseWheelListener(mouseInputListener);
-        frame.getContentPane().add(universePanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        frame.pack();
-        Insets insets = frame.getInsets();
-        frame.setSize(1024 + insets.left + insets.right, 1024 + insets.top + insets.bottom);
-        frame.setVisible(true);
+        runner.run();
     }
 }

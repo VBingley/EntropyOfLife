@@ -1,4 +1,4 @@
-package nl.bingley.entropyoflife;
+package nl.bingley.entropyoflife.application.windowapplication;
 
 import nl.bingley.entropyoflife.config.properties.LifeProperties;
 import nl.bingley.entropyoflife.config.properties.UniverseProperties;
