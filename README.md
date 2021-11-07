@@ -23,3 +23,30 @@ Enter/backspace/R | Reset and randomize
 Space | Pause/unpause
 Up/down arrow keys | Increase/Decrease generations per second
 Right arrow key | While paused, go to the next generation
+
+# Examples
+<details>
+  <summary>Regular Game of Life</summary>
+  
+  ![Game of Life](https://github.com/VBingley/EntropyOfLife/blob/master/images/gameOfLife.gif)
+</details>
+<details>
+  <summary>Game of Life with energy conservation</summary>
+  
+  ![Game of Life](https://github.com/VBingley/EntropyOfLife/blob/master/images/entropy-gol.gif)
+</details>
+<details>
+  <summary>Larger than Life R5</summary>
+  
+  ![Game of Life](https://github.com/VBingley/EntropyOfLife/blob/master/images/entropy-r5bugs.gif)
+</details>
+<details>
+  <summary>Larger than Life R10</summary>
+  
+  ![Game of Life](https://github.com/VBingley/EntropyOfLife/blob/master/images/entropy-r10bugs.gif)
+</details>
+<details>
+  <summary>Larger than Life R10 - 2</summary>
+  
+  ![Game of Life](https://github.com/VBingley/EntropyOfLife/blob/master/images/entropy-r10bugs-2.gif)
+</details>
