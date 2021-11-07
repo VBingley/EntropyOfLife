@@ -1,8 +1,7 @@
 package nl.bingley.entropyoflife.application.windowapplication;
 
-import nl.bingley.entropyoflife.config.properties.LifeProperties;
-import nl.bingley.entropyoflife.config.properties.UniverseProperties;
-import nl.bingley.entropyoflife.kernels.UniverseImageRenderer;
+import com.aparapi.Range;
+import nl.bingley.entropyoflife.kernels.RendererKernel;
 import nl.bingley.entropyoflife.models.Universe;
 import org.springframework.stereotype.Component;
 
@@ -16,9 +15,10 @@ public class UniversePanel extends JPanel {
     private static final long serialVersionUID = 119486406615542676L;
 
     private final Universe universe;
-    private final LifeProperties props;
 
-    private final UniverseImageRenderer imageRenderer;
+    private final RendererKernel rendererKernel;
+    private Range kernelRange;
+    private int[] imageData;
     private BufferedImage bufferedImage;
 
     private int translateX;
@@ -27,15 +27,14 @@ public class UniversePanel extends JPanel {
 
     private int genPerSec = 0;
 
-    public UniversePanel(Universe universe, UniverseProperties universeProperties, UniverseImageRenderer imageRenderer) {
+    public UniversePanel(Universe universe, RendererKernel rendererKernel) {
         super();
         this.universe = universe;
-        props = universeProperties.getLifeProperties();
         translateX = 1024 / 2 - universe.getSize() * cellSize / 2;
         translateY = 1024 / 2 - universe.getSize() * cellSize / 2;
 
-        this.imageRenderer = imageRenderer;
-        bufferedImage = new BufferedImage(1024, 1024, BufferedImage.TYPE_INT_RGB);
+        this.rendererKernel = rendererKernel;
+        updateBufferedImage(1024, 1024);
     }
 
     @Override
@@ -56,11 +55,16 @@ public class UniversePanel extends JPanel {
 
     private void paintCells(Graphics graphics) {
         if (bufferedImage.getWidth() != getWidth() || bufferedImage.getHeight() != getHeight()) {
-            bufferedImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+            updateBufferedImage(getWidth(), getHeight());
         }
 
-        int[] imageData = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
-        imageRenderer.render(imageData, getWidth(), cellSize, translateX, translateY);
+        rendererKernel.setCellSize(cellSize);
+        rendererKernel.setTranslateX(translateX);
+        rendererKernel.setTranslateY(translateY);
+
+        rendererKernel.put(universe.energyMatrix);
+        rendererKernel.execute(kernelRange);
+        rendererKernel.get(imageData);
 
         graphics.drawImage(bufferedImage, 0, 0, bufferedImage.getWidth(), bufferedImage.getHeight(), this);
     }
@@ -75,6 +79,13 @@ public class UniversePanel extends JPanel {
         int x = convertPixelToCellCoordinate(pixelX, true);
         int y = convertPixelToCellCoordinate(pixelY, false);
         return universe.energyMatrix[x][y];
+    }
+
+    private void updateBufferedImage(int width, int height) {
+        bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        this.imageData = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
+        kernelRange = Range.create(imageData.length);
+        rendererKernel.setImageDataSize(imageData, width);
     }
 
     public void setValueAtPixel(int pixelX, int pixelY, float value) {
