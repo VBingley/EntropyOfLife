@@ -34,7 +34,7 @@ public class Universe {
         for (int x = 0; x < energyMatrix.length; x++) {
             for (int y = 0; y < energyMatrix.length; y++) {
                 if (x < spawnMin || x > spawnMax || y < spawnMin || y > spawnMax) {
-                    energyMatrix[x][y] = 0.5f * lowEnergy + random.nextFloat() * 0.5f * lowEnergy;
+                    energyMatrix[x][y] = random.nextFloat() * lowEnergy;
                 } else {
                     energyMatrix[x][y] = random.nextBoolean() ? highEnergy : lowEnergy;
                 }

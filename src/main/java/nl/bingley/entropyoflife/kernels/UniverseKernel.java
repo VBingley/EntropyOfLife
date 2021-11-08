@@ -21,12 +21,10 @@ public class UniverseKernel extends Kernel {
     private final int surviveMin;
     private final int surviveMax;
     private final float lifeThreshold;
+    private final float maxEnergyState;
     private final float minEnergyState;
     private final float lowEnergyState;
     private final float highEnergyState;
-
-    private final float energyJump;
-    private final float energyStep;
 
     public UniverseKernel(Universe universe, UniverseProperties universeProperties) {
         super();
@@ -42,11 +40,10 @@ public class UniverseKernel extends Kernel {
         surviveMax = properties.getSurviveMax();
         birthMin = properties.getBirthMin();
         birthMax = properties.getBirthMax();
+        maxEnergyState = properties.getMaxEnergyState();
         minEnergyState = properties.getMinEnergyState();
         lowEnergyState = properties.getLowEnergyState();
         highEnergyState = properties.getHighEnergyState();
-        energyJump = properties.getEnergyJump();
-        energyStep = properties.getEnergyStep();
 
         setExplicit(true);
     }
@@ -82,25 +79,25 @@ public class UniverseKernel extends Kernel {
         boolean alive = energyValue > lifeThreshold;
         if (alive && (livingNeighbours < surviveMin || livingNeighbours > surviveMax)) {
             // Cell dies, lower energy state
-            return -energyJump;
-        } else if (alive && energyValue < highEnergyState - energyStep * 0.5) {
+            return lowEnergyState - energyValue;
+        } else if (alive && energyValue < highEnergyState) {
             // Cell stays alive, restore to high energy state
-            return energyStep;
-        } else if (alive && energyValue > highEnergyState + energyStep * 0.5) {
+            return highEnergyState - energyValue;
+        } else if (alive && energyValue > maxEnergyState) {
             // Cell stays alive, restore to high energy state
-            return -energyStep;
+            return highEnergyState - energyValue;
         } else if (alive) {
             // Cell stays alive, maintain high energy state
             return 0;
         } else if (livingNeighbours >= birthMin && livingNeighbours <= birthMax) {
             // Cell is born, raise energy state
-            return energyJump;
+            return highEnergyState - energyValue;
         } else if (energyValue > lowEnergyState) {
             // Cell stays dead, restore to low energy state
             return lowEnergyState - energyValue;
         } else if (energyValue < minEnergyState) {
             // Cell stays dead, restore low energy state
-            return minEnergyState - energyValue + energyStep;
+            return minEnergyState - energyValue;
         } else {
             // Cell stays dead, maintain low energy state
             return 0;

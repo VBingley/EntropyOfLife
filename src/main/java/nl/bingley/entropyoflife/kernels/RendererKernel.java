@@ -14,6 +14,8 @@ public class RendererKernel extends Kernel {
     private final float energyJump;
     private final float lifeEnergyThreshold;
     private final float highEnergyState;
+    private final float maxEnergyState;
+    private final float minEnergyState;
 
     private int[] imageData;
     private int imageWidth;
@@ -25,9 +27,11 @@ public class RendererKernel extends Kernel {
         energyMatrix = universe.energyMatrix;
         universeSize = universe.getSize();
         LifeProperties props = properties.getLifeProperties();
-        energyJump = props.getEnergyJump();
         lifeEnergyThreshold = props.getLifeEnergyThreshold();
         highEnergyState = props.getHighEnergyState();
+        maxEnergyState = props.getMaxEnergyState();
+        minEnergyState = props.getMinEnergyState();
+        energyJump = highEnergyState - props.getLowEnergyState();
 
         setExplicit(true);
     }
@@ -51,17 +55,17 @@ public class RendererKernel extends Kernel {
         } else {
             float range = energyJump;
             float cellValue = energyMatrix[cellX][cellY];
-            if (cellValue < 0) {
-                int color = colorGradient(min(range, abs(cellValue)) / range, 120);
+            if (cellValue < minEnergyState) {
+                int color = colorGradient(min(range, abs(cellValue)) / range, 122);
                 return color + (color << 16);
             } else if (cellValue < lifeEnergyThreshold) {
-                return colorGradient(cellValue / lifeEnergyThreshold, 122);
+                return colorGradient(cellValue / lifeEnergyThreshold, 170);
             } else if (cellValue < highEnergyState) {
                 return (71 << 16) + (97 << 8) + 60;
             } else {
                 float modifier = min(range, cellValue - lifeEnergyThreshold);
                 int red = colorGradient(modifier / range, 130);
-                int green = colorGradient(1 - (modifier / range), 130);
+                int green = colorGradient(maxEnergyState - (modifier / range), 130);
                 return (int) ((red << 16) + (green << 8) + ((1 - modifier / range)));
             }
         }

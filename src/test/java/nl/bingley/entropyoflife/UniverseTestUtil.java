@@ -40,7 +40,6 @@ public class UniverseTestUtil {
         when(lifeProps.getHighEnergyState()).thenReturn(1f);
         when(lifeProps.getLowEnergyState()).thenReturn(0f);
         when(lifeProps.getMinEnergyState()).thenReturn(0f);
-        when(lifeProps.getEnergyJump()).thenReturn(1f);
         when(lifeProps.getEnergyNeighbourhoodRadius()).thenReturn(0);
 
         UniverseProperties universeProps = mock(UniverseProperties.class);
@@ -61,8 +60,6 @@ public class UniverseTestUtil {
         when(lifeProps.getHighEnergyState()).thenReturn(0.75f);
         when(lifeProps.getLowEnergyState()).thenReturn(0.125f);
         when(lifeProps.getMinEnergyState()).thenReturn(0f);
-        when(lifeProps.getEnergyJump()).thenReturn(0.625f);
-        when(lifeProps.getEnergyStep()).thenReturn(0.125f);
         when(lifeProps.getEnergyNeighbourhoodRadius()).thenReturn(2);
 
         UniverseProperties universeProps = mock(UniverseProperties.class);

@@ -88,14 +88,14 @@ public class UniverseUpdateActionListenerTest {
 
         universeUpdateActionListener.updateUniverse();
 
-        float energyJump = props.getHighEnergyState() - props.getLowEnergyState();
-        float distributedEnergyJump = energyJump / 24f;
-        assertEnergyValue(props.getLowEnergyState() - distributedEnergyJump * 2 + distributedEnergyJump, energyMatrix[2][3]);
-        assertEnergyValue(props.getHighEnergyState(), energyMatrix[3][3]);
-        assertEnergyValue(props.getLowEnergyState() - distributedEnergyJump * 2 + distributedEnergyJump, energyMatrix[4][3]);
+        float distributedDyingCellEnergy = (props.getHighEnergyState() - props.getLowEnergyState()) / 24f;
+        float distributedBornCellEnergy = props.getHighEnergyState() / 24f;
+        assertEnergyValue(props.getLowEnergyState() - distributedBornCellEnergy * 2 + distributedDyingCellEnergy, energyMatrix[2][3]);
+        assertEnergyValue(props.getHighEnergyState() - distributedBornCellEnergy * 2 + distributedDyingCellEnergy * 2, energyMatrix[3][3]);
+        assertEnergyValue(props.getLowEnergyState() - distributedBornCellEnergy * 2 + distributedDyingCellEnergy, energyMatrix[4][3]);
 
-        assertEnergyValue(energyJump + distributedEnergyJump * 2 - distributedEnergyJump, energyMatrix[3][4]);
-        assertEnergyValue(energyJump + distributedEnergyJump * 2 - distributedEnergyJump, energyMatrix[3][2]);
+        assertEnergyValue(props.getHighEnergyState() + distributedDyingCellEnergy * 2 - distributedBornCellEnergy, energyMatrix[3][4]);
+        assertEnergyValue(props.getHighEnergyState() + distributedDyingCellEnergy * 2 - distributedBornCellEnergy, energyMatrix[3][2]);
         assertEnergyValue(props.getHighEnergyState() * 3, countTotalEnergy(energyMatrix));
     }
 

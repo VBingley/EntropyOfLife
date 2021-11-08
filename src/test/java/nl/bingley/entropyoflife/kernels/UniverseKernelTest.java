@@ -38,11 +38,12 @@ public class UniverseKernelTest {
         universeKernel.get(universe.deltaMatrix);
 
         float[][] deltaMatrix = universe.deltaMatrix;
-        assertEnergyValue(-lifeProperties.getEnergyJump(), deltaMatrix[1][2]);
+        float energyJump = lifeProperties.getHighEnergyState() - lifeProperties.getLowEnergyState();
+        assertEnergyValue(-energyJump, deltaMatrix[1][2]);
         assertEnergyValue(0, deltaMatrix[2][2]);
-        assertEnergyValue(-lifeProperties.getEnergyJump(), deltaMatrix[3][2]);
-        assertEnergyValue(lifeProperties.getEnergyJump(), deltaMatrix[2][1]);
-        assertEnergyValue(lifeProperties.getEnergyJump(), deltaMatrix[2][3]);
+        assertEnergyValue(-energyJump, deltaMatrix[3][2]);
+        assertEnergyValue(energyJump, deltaMatrix[2][1]);
+        assertEnergyValue(energyJump, deltaMatrix[2][3]);
         assertEquals(0f, countTotalEnergy(deltaMatrix));
     }
 

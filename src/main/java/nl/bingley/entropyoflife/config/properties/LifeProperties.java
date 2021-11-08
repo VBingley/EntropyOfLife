@@ -7,6 +7,7 @@ public class LifeProperties {
     private static final String LIFE_ENERGY_THRESHOLD = "life.%s.life-energy-threshold";
     private static final String HIGH_ENERGY_STATE = "life.%s.high-energy-state";
     private static final String LOW_ENERGY_STATE = "life.%s.low-energy-state";
+    private static final String MAX_ENERGY_STATE = "life.%s.max-energy-state";
     private static final String MIN_ENERGY_STATE = "life.%s.min-energy-state";
     private static final String LIFE_NEIGHBOURHOOD_RADIUS = "life.%s.life-neighbourhood-radius";
     private static final String ENERGY_NEIGHBOURHOOD_RADIUS = "life.%s.energy-neighbourhood-radius";
@@ -26,10 +27,8 @@ public class LifeProperties {
     private final float lifeEnergyThreshold;
     private final float highEnergyState;
     private final float lowEnergyState;
+    private final float maxEnergyState;
     private final float minEnergyState;
-
-    private final float energyJump;
-    private final float energyStep;
 
     private final Environment env;
     private final String ruleset;
@@ -45,10 +44,9 @@ public class LifeProperties {
         lifeEnergyThreshold = setOptional(LIFE_ENERGY_THRESHOLD);
         highEnergyState = setOptional(HIGH_ENERGY_STATE);
         lowEnergyState = setOptional(LOW_ENERGY_STATE);
+        maxEnergyState = setOptional(MAX_ENERGY_STATE);
         minEnergyState = setOptional(MIN_ENERGY_STATE);
         energyNeighbourhoodRadius = setOptional(ENERGY_NEIGHBOURHOOD_RADIUS).intValue();
-        energyJump = highEnergyState - lowEnergyState;
-        energyStep = Math.min(lowEnergyState * 0.5f, energyJump * 0.5f);
     }
 
     private Float setOptional(String property) {
@@ -70,6 +68,10 @@ public class LifeProperties {
 
     public float getLowEnergyState() {
         return lowEnergyState;
+    }
+
+    public float getMaxEnergyState() {
+        return maxEnergyState;
     }
 
     public float getMinEnergyState() {
@@ -98,13 +100,5 @@ public class LifeProperties {
 
     public int getSurviveMin() {
         return surviveMin;
-    }
-
-    public float getEnergyJump() {
-        return energyJump;
-    }
-
-    public float getEnergyStep() {
-        return energyStep;
     }
 }

@@ -23,7 +23,7 @@ public class UniversePanel extends JPanel {
 
     private int translateX;
     private int translateY;
-    private int cellSize = 16;
+    private int cellSize = 8;
 
     private int genPerSec = 0;
 
