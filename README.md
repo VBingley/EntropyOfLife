@@ -7,7 +7,7 @@ However, while GoL only counts the values of neighbouring cells within a radius 
 
 As an extention to LtL I've added a way for the system as a whole to conserve its energy. 
 Cell values are now float instead of integer values. To go from a dead state to an alive state, the cell needs to take this required energy from its neighbours in a set radius. 
-This radius can be different from the regular neighbourhood radius.
+This radius can be different from the regular neighbourhood radius. This way the net energy in the entire system doesn't change and exponential growth is impossible.
 
 # Configuration
 All relevant parameters for the simulation are configured in application.properties. 
